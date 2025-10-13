@@ -3,12 +3,16 @@
 
 ## Motivation
 
-*"**Momentum** is the observation that financial assets trending strongly in a certain direction will continue to move in that direction. The concept of momentum is based on similar theories in physics, where an object in motion tends to stay in motion unless disrupted by an external force."*
+"**Momentum** is the observation that financial assets trending strongly in a certain direction will continue to move in that direction. The concept of momentum is based on similar theories in physics, where an object in motion tends to stay in motion unless disrupted by an external force."*
 - [CorporateFinanceInstitute](https://corporatefinanceinstitute.com/resources/career-map/sell-side/capital-markets/momentum/)
 
 While the definition of momentum seems simple, financial experts categorize it as a **market anomaly**. This project aims to analize, using the **MSCI World Index**, wether the assumption behind financial momentum is supported by data during the recent years (2020-2025). Understanding if the momentum effect still exists in recent years is relevant, as markets are influenced by global events such as the COVID-19 pandemic or wars. The goal is to see if, by filtering a subset of the best momentum stocks, we can outperform the passive benchmark index. 
 
 To prove the effectivness of a momentum strategy, I will compare to the benchmark index both a subset of stocks with the **lowest momentum values** and one with the **highest momentum values**, by constructing a portfolio for each and assuming equal weighting.
+
+
+
+
 
 ## Approach
 1. **Data Preparation**
