@@ -1,18 +1,18 @@
-# Momentum Strategy
+# Short-Term Momentum Strategy on Global Stocks (2020–2025)
 ### Category: Data Analysis & Financial Modeling
 
 ## Motivation
 
-"**Momentum** is the observation that financial assets trending strongly in a certain direction will continue to move in that direction. The concept of momentum is based on similar theories in physics, where an object in motion tends to stay in motion unless disrupted by an external force."*
+*"**Momentum** is the observation that financial assets trending strongly in a certain direction will continue to move in that direction. The concept of momentum is based on similar theories in physics, where an object in motion tends to stay in motion unless disrupted by an external force."*
 - [CorporateFinanceInstitute](https://corporatefinanceinstitute.com/resources/career-map/sell-side/capital-markets/momentum/)
 
-While the definition of momentum seems simple, financial experts categorize it as a **market anomaly**. This project aims to analize, using the **MSCI World Index**, wether the assumption behind financial momentum is supported by data during the recent years (2020-2025). Understanding if the momentum effect still exists in recent years is relevant, as markets are influenced by global events such as the COVID-19 pandemic or wars. The goal is to see if, by filtering a subset of the best momentum stocks, we can outperform the passive benchmark index. 
+The first research on the momentum effect was conducted by **Jegadeesh and Titman (1993)**, who discovered that stocks with strong past performance tend to do better than stocks with poor past performance and the overall market over medium/long term horizons. This study contradict the **Efficient Market Hypothesis** that states that it's impossible to perform better than the market, reveiling that the human factor, such as investors over/under reacting to certain news, allows financial trends to persist beyond what the theory would justify.
 
-To prove the effectivness of a momentum strategy, I will compare to the benchmark index both a subset of stocks with the **lowest momentum values** and one with the **highest momentum values**, by constructing a portfolio for each and assuming equal weighting.
+While the momentum definition seems simple, financial experts classify the momentum effect as a **market anomaly**. With this project, I want to analyse, using the **MSCI World Index**, wether this momentum effect remains present in recent years (2020-2025) and especially if this trend can be observed even within such a short time window.
 
+Understanding the presence of this effect in today's environment seems relevant, where financial market are more connected than ever and events like the **COVID-19 pandemic**, rising incertitude and geopolitical tension. If the momentum effect still shows up under these conditions, it would suggests that strctural inefficiencies are still embedded in nowadays's financial market.
 
-
-
+The goal of this project is to construt a portfolio with a subset of the best stocks (relative to momentum) and see if it actually outperform the general index. In addiction, to better validate the results, a similar portfolio but with the worst stocks will also be built to offer a comparison on returns differentials between winners and losers.
 
 ## Approach
 1. **Data Preparation**
