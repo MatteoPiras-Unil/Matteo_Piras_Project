@@ -21,8 +21,8 @@ To prove the effectivness of a momentum strategy, I will compare to the benchmar
    - Other metrics to support momentum theory like **Sharpe Ratio**, **volatility**, **mean returns**.
 3. **Graphic Visualization**
    - Create various graphs and charts to visualize the results:
-         - Momentum graphs
-         - Returns graphs
+             - Momentum graphs
+             - Returns graphs
 
 ## Challenges
    - **Data completeness:** missing data may occur or multiple currency values that could distort results.
