@@ -6,7 +6,7 @@
 *"In finance, **momentum** is the empirically observed tendency for rising asset prices or securities return to rise further, and falling prices to keep falling."*
 - [Wikipedia](https://en.wikipedia.org/wiki/Momentum_(finance))
 
-While the definition of momentum seems simple, financial experts categorize it as a **market anomaly**. This project aims to analize, using the **MSCI World Index**, wether the assumption behind financial momentum is supported by data during the recent years (2020-2025). The goal is to see if, by filtering a subset of the best momentum stocks, we can outperform the passive benchmark index. 
+While the definition of momentum seems simple, financial experts categorize it as a **market anomaly**. This project aims to analize, using the **MSCI World Index**, wether the assumption behind financial momentum is supported by data during the recent years (2020-2025). Understanding if the momentum effect still exists in recent years is relevant, as markets are influenced by global events such as the COVID-19 pandemic or wars. The goal is to see if, by filtering a subset of the best momentum stocks, we can outperform the passive benchmark index. 
 
 To prove the effectivness of a momentum strategy, I will compare to the benchmark index both a subset of stocks with the **lowest momentum values** and one with the **highest momentum values**, by constructing a portfolio for each and assuming equal weighting.
 
