@@ -1,4 +1,4 @@
-# Momentum Strategies
+# Momentum Strategy
 ### Category: Data Analysis & Financial Modeling
 
 ## Motivation
@@ -18,4 +18,11 @@ To prove the effectivness of a momentum strategy, I will compare to the benchmar
    - Define top-bottom 10% for each month and create graphical results.
    - Compute monthly returns for each stock to create confrontational graph.
    - Other metrics to support momentum theory.
+
+## Challenges
+   - **Data completeness:** missing data may occur, or multiple currency values that can give falsified results
+   - **Computational load:** python's run can be long if not well structured code.
+
+## Success if...
+The project will be successfull if I can show that the Momentum Theory can be proven by data analysis and be clear via visualization. In other words, if the portfolio with the best momentum stocks performs better than the benchmark (and viceversa for the worst momentum stocks).
 
