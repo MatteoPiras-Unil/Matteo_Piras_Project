@@ -6,7 +6,7 @@
 *"**Momentum** is the observation that financial assets trending strongly in a certain direction will continue to move in that direction. The concept of momentum is based on similar theories in physics, where an object in motion tends to stay in motion unless disrupted by an external force."*
 - [CorporateFinanceInstitute](https://corporatefinanceinstitute.com/resources/career-map/sell-side/capital-markets/momentum/)
 
-The first research on the momentum effect was conducted by **Jegadeesh and Titman (1993)**, who discovered that stocks with strong past performance tend to do better than stocks with poor past performance and the overall market over medium/long term horizons. This study contradict the **Efficient Market Hypothesis** that states that it's impossible to perform better than the market, reveiling that the human factor, such as investors over/under reacting to certain news, allows financial trends to persist beyond what the theory would justify.
+The first research on the momentum effect was conducted by **Jegadeesh and Titman (1993)**[1], who discovered that stocks with strong past performance tend to do better than stocks with poor past performance and the overall market over medium/long term horizons. This study contradict the **Efficient Market Hypothesis** that states that it's impossible to perform better than the market, reveiling that the human factor, such as investors over/under reacting to certain news, allows financial trends to persist beyond what the theory would justify.
 
 While the momentum definition seems simple, financial experts classify the momentum effect as a **market anomaly**. With this project, I want to analyse, using the **MSCI World Index**, wether this momentum effect remains present in recent years (2020-2025) and especially if this trend can be observed even within such a short time window.
 
@@ -37,3 +37,9 @@ In other words, if the portfolio with the best momentum stocks performs better t
 ## Stretch Goals
    - Geographic-level analysis.
    - Different time approach (3 months, 6 months,...).
+
+## Data Source
+MSCI World Index's datas are retrieved from **Reuters DataStream** and, which is a subscription website and therefore no link is avaiable but the dataset will be uploaded on GitHub. It consists of the stocks present in this index with their market capitalization, end of the month stock price from 2018 to september 2025 and other informations about the stock. 
+
+## Bibliography
+[1]: Jegadeesh, Narasimhan, and Sheridan Titman. “Returns to Buying Winners and Selling Losers: Implications for Stock Market Efficiency.” The Journal of Finance, vol. 48, no. 1, 1993, pp. 65–91. JSTOR, https://doi.org/10.2307/2328882. Accessed 15 Oct. 2025.
