@@ -42,6 +42,6 @@ The project is going to be successfull if it can demonstrate that the **Momentum
 The MSCI World Index data has been retrieved from Refinitiv Datastream, a subscription-based financial database; therefore, a public access link is not available. However, the extracted dataset is going to be uploaded to the project’s GitHub repository. The dataset includes all constituent stocks of the MSCI World Index along with: their market capitalizations, end-of-month prices from 2018 to September 2025, and additional stock-level information. 
 
 ## Bibliography
-[1]: Jegadeesh, Narasimhan, and Sheridan Titman. “Returns to Buying Winners and Selling Losers: Implications for Stock Market Efficiency.” The Journal of Finance, vol. 48, no. 1, 1993, pp. 65–91. JSTOR, https://doi.org/10.2307/2328882. Accessed 15 Oct. 2025.
-[2]: Efficient-market hypothesis (EMH) | Research Starters | EBSCO Research. (n.d.). EBSCO. https://www.ebsco.com/research-starters/social-sciences-and-humanities/efficient-market-hypothesis-emh
-[3]: MSCI Inc. (2021). MSCI Momentum Indexes Methodology. In MSCI Momentum Indexes Methodology (pg. 4) (Report). https://www.msci.com/eqb/methodology/meth_docs/MSCI_Momentum_Indexes_Methodology_Aug2021.pdf
+- [1]: Jegadeesh, Narasimhan, and Sheridan Titman. “Returns to Buying Winners and Selling Losers: Implications for Stock Market Efficiency.” The Journal of Finance, vol. 48, no. 1, 1993, pp. 65–91. JSTOR, https://doi.org/10.2307/2328882. Accessed 15 Oct. 2025.
+- [2]: Efficient-market hypothesis (EMH) | Research Starters | EBSCO Research. (n.d.). EBSCO. https://www.ebsco.com/research-starters/social-sciences-and-humanities/efficient-market-hypothesis-emh
+- [3]: MSCI Inc. (2021). MSCI Momentum Indexes Methodology. In MSCI Momentum Indexes Methodology (pg. 4) (Report). https://www.msci.com/eqb/methodology/meth_docs/MSCI_Momentum_Indexes_Methodology_Aug2021.pdf
