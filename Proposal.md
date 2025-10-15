@@ -39,7 +39,7 @@ In other words, if the portfolio with the best momentum stocks performs better t
    - Different time approach (3 months, 6 months,...).
 
 ## Data Source
-MSCI World Index's datas are retrieved from **Reuters DataStream** and, which is a subscription website and therefore no link is avaiable but the dataset will be uploaded on GitHub. It consists of the stocks present in this index with their market capitalization, end of the month stock price from 2018 to september 2025 and other informations about the stock. 
+The MSCI World Index data were retrieved from Refinitiv Datastream, a subscription-based financial database; therefore, a public access link is not available. However, the extracted dataset will be uploaded to the project’s GitHub repository. The dataset includes all constituent stocks of the MSCI World Index, along with their market capitalizations, end-of-month prices from 2018 to September 2025, and additional stock-level information. 
 
 ## Bibliography
 [1]: Jegadeesh, Narasimhan, and Sheridan Titman. “Returns to Buying Winners and Selling Losers: Implications for Stock Market Efficiency.” The Journal of Finance, vol. 48, no. 1, 1993, pp. 65–91. JSTOR, https://doi.org/10.2307/2328882. Accessed 15 Oct. 2025.
