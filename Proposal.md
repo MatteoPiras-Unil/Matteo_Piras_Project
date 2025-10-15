@@ -19,7 +19,8 @@ The goal of this project is to construt a portfolio with a subset of the best st
    - Load and explore dataset.
    - Clean and keep only relevant datas.
 2. **Finance analysis**
-   - Compute monthly momentum for each stock.
+   - Determination of Momentum Score, using MSCI Methodology[2]:
+   $ \text{Momentum}_{6m} = \left( \frac{P_{t-1}}{P_{t-7}} - 1 \right) $.
    - Define winners/losers subset with fixed entities for each month and create graphical results.
    - Compute monthly returns for each stock to create comparative graphs.
    - Other metrics to support momentum theory like **Sharpe Ratio**, **volatility**, **mean returns**.
