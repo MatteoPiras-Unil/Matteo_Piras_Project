@@ -4,7 +4,7 @@ from pathlib import Path
 # Path to the data folder
 RAW = Path("data/raw")
 
-# --- Load Monthly_Data.csv
+#Load Monthly_Data.csv
 m_path = RAW / "Monthly_Data.csv"
 md = pd.read_csv(m_path, sep=";")   # <--- important: sep=";" for European CSV
 print("✅ Monthly_Data.csv loaded!")
@@ -20,7 +20,7 @@ try:
 except Exception as e:
     print(f"Could not parse '{date_col}' as dates:", e)
 
-# --- Load Basic_Data.csv
+#Load Basic_Data.csv
 b_path = RAW / "Basic_Data.csv"
 bd = pd.read_csv(b_path, sep=";")
 print("\n✅ Basic_Data.csv loaded!")
