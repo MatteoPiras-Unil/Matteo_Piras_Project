@@ -1,4 +1,4 @@
-# 1) Make sure Python can see the "src" folder
+"""Make sure Python can see the "src" folder"""
 import sys
 from pathlib import Path
 
@@ -9,7 +9,7 @@ sys.path.insert(0, str(root / "src"))
 # scripts/test_data_io.py
 try:
     from momentum.data_io import load_monthly_data, load_basic_data
-except Exception:
+except ImportError:
     import importlib.util
 
     # Fallback: load the module directly from the src path if package import fails
@@ -24,7 +24,7 @@ except Exception:
     load_basic_data = module.load_basic_data
 
 def main():
-    # Load monthly data
+    """ Load monthly data and run a quick test to ensure everything is working. """
     monthly = load_monthly_data()
     print("✅ Monthly data loaded!")
     print("Shape:", monthly.shape)
