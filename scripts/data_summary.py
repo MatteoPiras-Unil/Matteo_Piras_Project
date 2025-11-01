@@ -172,7 +172,7 @@ def main() -> None:
         plt.figure(figsize=(9, 5))
         plt.barh(top10["Label"].astype(str), top10[mcap_col].values)
         plt.gca().invert_yaxis()
-        plt.xlabel("Market Cap")
+        plt.xlabel("Market Cap, in billion")
         plt.title("Top 10 Companies by Market Cap")
         plt.tight_layout()
         plt.savefig(CHART_PATH, dpi=200)
