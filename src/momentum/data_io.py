@@ -10,7 +10,7 @@ def load_monthly_data() -> pd.DataFrame:
     path = RAW / "Monthly_Data.csv"
     df = pd.read_csv(path, sep=";")
     date_col = df.columns[0]
-    df[date_col] = pd.to_datetime(df[date_col], errors="coerce")
+    df[date_col] = pd.to_datetime(df[date_col], errors="coerce", dayfirst=True)
     return df.rename(columns={date_col: "date"})
 
 def load_basic_data() -> pd.DataFrame:
