@@ -12,8 +12,9 @@ Generate a 1-page PDF 'Dataset Summary Report' with:
 
 Output:
 results/data_summary.pdf
-results/top10_mcap.png   (aux chart image)
-"""
+results/top10_mcap.png
+
+This is purely informative and not used in the main analysis."""
 
 from __future__ import annotations
 
