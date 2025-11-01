@@ -1,4 +1,4 @@
-# Load and return ready-to-use Dataframes
+"""Data I/O functions for momentum project."""
 
 from pathlib import Path
 import pandas as pd
