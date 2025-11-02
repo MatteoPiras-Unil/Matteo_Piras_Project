@@ -1,13 +1,6 @@
 
-"""
-Build monthly stock returns for large-cap names only (MktCap > 10B).
-Inputs:
-- data/raw/Monthly_Data.csv   (date, iShares, NR1..NRn)
-- data/raw/Basic_Data.csv     (NR, MarketCap, ...)
-
-Outputs:
-- data/processed/stock_returns_wide.csv  (date + one column per NR with 1m returns)
-- data/processed/stock_returns_long.csv  (date, NR, ret_1m)
+"""Build monthly stock return features for large-cap stocks (MktCap > $10B).
+Saves both wide and long formats to data/processed/.
 """
 
 from pathlib import Path
@@ -60,18 +53,10 @@ def main() -> None:
     all_stock_cols = list(monthly.columns[2:]) # NR columns
 
     # 3) Resolve linking + market cap columns from Basic_Data (robust to naming)
-    nr_col = _find_column(basic, ["NR", "Nr", "Id", "ID", "Ticker", "Symbol"])
-    mcap_col = _find_column(
-        basic,
-        [
-            "MktCap",
-            "MarketCap",
-            "Market Cap",
-            "Company Market Capitalization",
-            "Company Market Capitalization (Local)",
-            "Market Capitalization",
-        ],
-    )
+    # Define directly since we know the column names
+    nr_col = "NR"
+    mcap_col = " Company Market Capitalization "
+
 
     if nr_col is None or mcap_col is None:
         raise ValueError(
