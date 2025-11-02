@@ -62,9 +62,8 @@ def main() -> None:
     all_stock_cols = list(levels.columns[2:])
 
     # 3) Find NR + MarketCap columns in Basic_Data
-    
     nr_col = "NR"
-    mcap_col = "Company Market Capitalization"
+    mcap_col = " Company Market Capitalization "
     
     if nr_col is None or mcap_col is None:
         raise ValueError(
