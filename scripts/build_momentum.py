@@ -62,19 +62,10 @@ def main() -> None:
     all_stock_cols = list(levels.columns[2:])
 
     # 3) Find NR + MarketCap columns in Basic_Data
-    nr_col = _find_column(basic, ["NR", "Nr", "Id", "ID", "Ticker", "Symbol"])
-    mcap_col = _find_column(
-        basic,
-        [
-            "MktCap",
-            "MarketCap",
-            "Market Cap",
-            "Company Market Capitalization",
-            "Company Market Capitalization (Local)",
-            "Market Capitalization",
-            " Company Market Capitalization ",
-        ],
-    )
+    
+    nr_col = "NR"
+    mcap_col = "Company Market Capitalization"
+    
     if nr_col is None or mcap_col is None:
         raise ValueError(
             f"Could not find NR or MarketCap columns in Basic_Data. "
