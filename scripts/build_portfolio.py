@@ -62,7 +62,7 @@ def load_inputs():
     bench_col = levels.columns[1]  # iShares (second column)
     levels[date_col] = pd.to_datetime(levels[date_col], errors="coerce")
 
-        # 🔧 Coerce benchmark to numeric (handles commas, %, weird symbols)
+        
     levels[bench_col] = (
         levels[bench_col]
         .astype(str)
@@ -221,28 +221,27 @@ def main():
     # 5) Combined plot
     plot_all(cum_dict, bench_cum, RES / "portfolios_vs_benchmark.png")
 
-    # Print quick metrics table
+    # Print quick metrics table (do NOT save; compute_metrics.py is the source of truth)
     print("\n=== Performance summary (monthly → annualized) ===")
     rows = []
     for n in PORT_SIZES:
         m = annualized_metrics(port_monthly[n])
         rows.append([f"Top {n}", m["ann_return"], m["ann_vol"], m["sharpe"]])
-    # Benchmark metrics
+
     bm = annualized_metrics(bench.rename("bench_ret"))
     rows.append(["Benchmark", bm["ann_return"], bm["ann_vol"], bm["sharpe"]])
 
     df_sum = pd.DataFrame(rows, columns=["Portfolio", "Ann.Return", "Ann.Vol", "Sharpe"]).set_index("Portfolio")
     pd.set_option("display.float_format", lambda x: f"{x:0.4f}")
     print(df_sum)
-    # Also save summary
-    df_sum.to_csv(RES / "performance_summary.csv")
+
     print("\nSaved:")
     print("  - results/portfolios_vs_benchmark.png")
     for n in PORT_SIZES:
         print(f"  - results/portfolio_top{n}.png")
-    print("  - results/performance_summary.csv")
     for n in PORT_SIZES:
         print(f"  - data/processed/portfolio_returns_top{n}.csv")
+
     # Build a dict of monthly returns for metrics
     named = {f"Top {n}": port_monthly[n] for n in PORT_SIZES}
     named["Benchmark"] = bench
