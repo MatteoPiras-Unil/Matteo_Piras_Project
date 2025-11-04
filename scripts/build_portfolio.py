@@ -162,6 +162,17 @@ def plot_all(portfolios: dict[str, pd.Series], bench_cum: pd.Series, outfile: Pa
     plt.xlabel("Date")
     plt.ylabel("Cumulative value (start=1.0)")
     plt.legend()
+    events = [
+    ("2020-02-15", "COVID-19"),
+    ("2025-02-01", "Trump Tariff announcement")
+    ]
+
+    ymin, ymax = plt.ylim()
+    for date, label in events:
+        d = pd.to_datetime(date)
+        plt.axvline(x=d, color="gray", linestyle="--", linewidth=1.2, alpha=0.7)
+        plt.text(d, ymax * 0.995, label, rotation=90, va="top", ha="right", fontsize=9, color="gray")
+        
     plt.tight_layout()
     plt.savefig(outfile, dpi=220)
     plt.close()
@@ -186,9 +197,28 @@ def main():
     # Compute benchmark cumulative index from returns
     bench_cum = cum_index(bench, start=1.0)
 
-    # Make a combined plot
-    cum_dict = {f"Top {n}": cum_index(port_monthly[n], start=1.0).reindex(bench_cum.index, method="nearest")
-                for n in PORT_SIZES}
+        # ----- Align series to the same start date and rebase -----
+
+    # 1) Compute monthly benchmark returns (already done above in load_inputs)
+    # bench: pd.Series of monthly returns indexed by date
+
+    # 2) Find a COMMON start date = max of each series' first valid date
+    series_list = [s for s in port_monthly.values() if not s.empty]
+    starts = [s.index.min() for s in series_list if not s.empty]
+    if not bench.empty:
+        starts.append(bench.index.min())
+    common_start = max(starts)  # ensure everyone has data from here on
+    print("Common start date:", common_start)
+
+    # 3) Trim all monthly-return series to >= common_start
+    bench_aligned = bench[bench.index >= common_start]
+    ports_aligned = {n: s[s.index >= common_start] for n, s in port_monthly.items()}
+
+    # 4) Rebase from 1.0 using the trimmed returns
+    bench_cum = cum_index(bench_aligned, start=1.0)
+    cum_dict = {f"Top {n}": cum_index(ports_aligned[n], start=1.0) for n in PORT_SIZES}
+
+    # 5) Combined plot
     plot_all(cum_dict, bench_cum, RES / "portfolios_vs_benchmark.png")
 
     # Print quick metrics table
