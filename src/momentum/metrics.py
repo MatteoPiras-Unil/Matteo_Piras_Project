@@ -4,7 +4,12 @@ import numpy as np
 import pandas as pd
 
 def cum_index(returns: pd.Series, start: float = 1.0) -> pd.Series:
-    return (1.0 + returns.fillna(0)).cumprod() * start
+    """Cumulative index that starts exactly at `start` on the first date."""
+    r = returns.sort_index()
+    cum = (1.0 + r.fillna(0)).cumprod()
+    cum = cum.shift(1, fill_value=1.0)  # anchor first point to 1.0
+    return cum * start
+
 
 def cagr(r: pd.Series) -> float:
     r = r.dropna()

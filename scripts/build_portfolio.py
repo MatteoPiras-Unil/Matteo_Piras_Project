@@ -122,9 +122,12 @@ def build_portfolio_returns(mom: pd.DataFrame, rets_wide: pd.DataFrame, top_n: i
     return pd.Series(values, index=index, name=f"top{top_n}_ret")
 
 
-def cum_index(returns: pd.Series, start=1.0) -> pd.Series:
-    """Convert monthly returns series to a cumulative index starting at `start`."""
-    return (1.0 + returns.fillna(0)).cumprod() * start
+def cum_index(returns: pd.Series, start: float = 1.0) -> pd.Series:
+    """Cumulative index that starts exactly at `start` on the first date."""
+    r = returns.sort_index()
+    cum = (1.0 + r.fillna(0)).cumprod()
+    cum = cum.shift(1, fill_value=1.0)  # anchor first point to 1.0
+    return cum * start
 
 
 def annualized_metrics(returns: pd.Series) -> dict:
@@ -164,8 +167,8 @@ def plot_all(portfolios: dict[str, pd.Series], bench_cum: pd.Series, outfile: Pa
     plt.ylabel("Cumulative value (start=1.0)")
     plt.legend()
     events = [
-    ("2020-02-15", "COVID-19"),
-    ("2025-02-01", "Trump Tariff announcement")
+    ("2020-03-15", "COVID-19"),
+    ("2025-03-01", "Trump Tariff announcement")
     ]
 
     ymin, ymax = plt.ylim()
