@@ -9,6 +9,7 @@ data/processed/
 results/*
 !results/data_summary.pdf
 !results/top10_mcap.png
+!results/portfolios_vs_benchmark.png
 .ipynb_checkpoints/
 .DS_Store
 Thumbs.db
