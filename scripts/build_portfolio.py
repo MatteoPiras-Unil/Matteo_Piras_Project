@@ -17,8 +17,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from momentum.data_io import load_monthly_data 
+from momentum.metrics import cum_index, metrics_table, align_common_start
 
-from momentum.data_io import load_monthly_data  # for benchmark levels
 
 
 DATA = Path("data/processed")
@@ -171,8 +172,7 @@ def plot_all(portfolios: dict[str, pd.Series], bench_cum: pd.Series, outfile: Pa
     for date, label in events:
         d = pd.to_datetime(date)
         plt.axvline(x=d, color="gray", linestyle="--", linewidth=1.2, alpha=0.7)
-        plt.text(d, ymax * 0.995, label, rotation=90, va="top", ha="right", fontsize=9, color="gray")
-        
+        plt.text(d, ymax * 0.995, label, rotation=90, va="top", ha="right", fontsize=9, color="gray")   
     plt.tight_layout()
     plt.savefig(outfile, dpi=220)
     plt.close()
@@ -243,6 +243,20 @@ def main():
     print("  - results/performance_summary.csv")
     for n in PORT_SIZES:
         print(f"  - data/processed/portfolio_returns_top{n}.csv")
+    # Build a dict of monthly returns for metrics
+    named = {f"Top {n}": port_monthly[n] for n in PORT_SIZES}
+    named["Benchmark"] = bench
+
+    # Align samples, then compute table
+    aligned, bench_aligned, _ = align_common_start(named, named["Benchmark"])
+    aligned["Benchmark"] = bench_aligned
+    df_sum = metrics_table(aligned)
+
+    print("\n=== Performance Metrics (from build_portfolio quick check) ===")
+    pd.set_option("display.float_format", lambda x: f"{x:0.4f}")
+    print(df_sum)
+    #df_sum.to_csv(RES / "performance_summary.csv")
+
 
 
 if __name__ == "__main__":
