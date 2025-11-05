@@ -7,6 +7,12 @@ data/interim/
 data/processed/
 
 results/*
+!results/sharpe_ratio_vs_topN_by_horizon.png
+!results/sharpe_vs_topN_by_horizon.png
+!results/cagr_vs_topN_by_horizon.png
+!results/vol_vs_topN_by_horizon.png
+!results/topN_sensitivity_*.png
+!results/horizon_bestN_multi.png
 !results/portfolios_vs_benchmark_1m.png
 !results/portfolios_vs_benchmark_3m.png
 !results/portfolios_vs_benchmark_6m.png
