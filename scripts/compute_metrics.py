@@ -1,6 +1,7 @@
 # scripts/compute_metrics.py
 from __future__ import annotations
 import sys
+import argparse
 from pathlib import Path
 from pathlib import Path as _P
 
@@ -58,7 +59,22 @@ def load_benchmark_returns() -> pd.Series:
     return bench
 
 
-def main():
+def parse_args() -> argparse.Namespace:
+    ap = argparse.ArgumentParser()
+    ap.add_argument(
+        "--lookback",
+        type=int,
+        default=6,
+        choices=[1, 3, 6, 12],
+        help="Momentum horizon label for saving (only affects output filename).",
+    )
+    return ap.parse_args()
+
+
+def main() -> None:
+    args = parse_args()
+    lookback = args.lookback
+
     # Load data
     portfolios = load_portfolios()
     bench = load_benchmark_returns()
@@ -76,10 +92,13 @@ def main():
     print("\n=== Performance Metrics (aligned sample) ===")
     print(df)
 
-    out_csv = RES / "metrics_summary.csv"
-    df.to_csv(out_csv)
-    print(f"\nSaved: {out_csv}")
+    # Save with horizon-specific suffix (normalize 6m to _6m as well)
+    suffix = f"_{lookback}m"
+    out = RES / f"metrics_summary{suffix}.csv"
+    df.to_csv(out, index=True)
+    print(f"\nSaved: {out}")
 
 
 if __name__ == "__main__":
     main()
+

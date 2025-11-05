@@ -45,31 +45,14 @@ def _sig(p: float | None) -> str:
     return ""
 
 def _load_summary_for_horizon(lookback: int) -> pd.DataFrame:
-    """Try metrics_summary first, then performance_summary. Handle 6m suffixless case."""
-    suffix = f"_{lookback}m" if lookback != 6 else ""
-    candidates = [
-        RES / f"metrics_summary{suffix}.csv",
-        RES / f"performance_summary{suffix}.csv",
-    ]
-    # also try unsuffixed filenames for robustness (some scripts save 6m without suffix)
-    if lookback == 6:
-        candidates += [
-            RES / "metrics_summary.csv",
-            RES / "performance_summary.csv",
-        ]
-
-    for path in candidates:
-        if path.exists():
-            df = pd.read_csv(path)
-            df = _normalize_cols(df)
-            print(f"[pretty_table] Using {path.name} for {lookback}m")
-            return df
-
-    raise FileNotFoundError(
-        f"Missing summary for {lookback}m. Looked for any of:\n  - " +
-        "\n  - ".join(str(p) for p in candidates)
-        + "\nRun build_portfolio.py/compute_metrics.py for this horizon."
-    )
+    suffix = f"_{lookback}m"
+    path = RES / f"metrics_summary{suffix}.csv"   # enforce HAC version per horizon
+    if not path.exists():
+        raise FileNotFoundError(
+            f"Missing {path}. Run: python scripts/compute_metrics.py --lookback {lookback}"
+        )
+    print(f"[pretty_table] Using {path.name} for {lookback}m")
+    return pd.read_csv(path)
 
 def _format_for_plot(df: pd.DataFrame) -> pd.DataFrame:
     # keep only Top N rows and the key columns (use what exists)
