@@ -153,14 +153,14 @@ def plot_single(cum: pd.Series, title: str, outfile: Path):
     plt.close()
 
 
-def plot_all(portfolios: dict[str, pd.Series], bench_cum: pd.Series, outfile: Path):
+def plot_all(portfolios: dict[str, pd.Series], bench_cum: pd.Series, outfile: Path, lookback: int = 6):
     plt.figure(figsize=(10, 6))
     # Benchmark first
     plt.plot(bench_cum.index, bench_cum.values, label="Benchmark (iShares)")
     # Then strategies
     for name, series in portfolios.items():
         plt.plot(series.index, series.values, label=name)
-    plt.title("Momentum Portfolios vs Benchmark")
+    plt.title(f"Momentum Portfolios vs Benchmark ({lookback}-month momentum)")
     plt.xlabel("Date")
     plt.ylabel("Cumulative value (start=1.0)")
     plt.legend()
@@ -230,7 +230,7 @@ def main():
     cum_dict = {f"Top {n}": cum_index(ports_aligned[n], start=1.0) for n in PORT_SIZES}
 
     # 5) Combined plot
-    plot_all(cum_dict, bench_cum, RES / f"portfolios_vs_benchmark_{lookback}m.png")
+    plot_all(cum_dict, bench_cum, RES / f"portfolios_vs_benchmark_{lookback}m.png", lookback)
 
     # Print quick metrics table (do NOT save; compute_metrics.py is the source of truth)
     print("\n=== Performance summary (monthly → annualized) ===")
