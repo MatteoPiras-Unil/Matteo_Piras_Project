@@ -204,11 +204,11 @@ def main():
         cum_s = cum_index(s, start=1.0)
         plot_single(cum_s, f"Momentum Portfolio Top {n}", RES / f"portfolio_top{n}.png")
 
-    # Align everything with benchmark
+    
     # Compute benchmark cumulative index from returns
     bench_cum = cum_index(bench, start=1.0)
 
-        # ----- Align series to the same start date and rebase -----
+    
 
     # 1) Compute monthly benchmark returns (already done above in load_inputs)
     # bench: pd.Series of monthly returns indexed by date
@@ -265,7 +265,17 @@ def main():
     print("\n=== Performance Metrics (from build_portfolio quick check) ===")
     pd.set_option("display.float_format", lambda x: f"{x:0.4f}")
     print(df_sum)
-    #df_sum.to_csv(RES / "performance_summary.csv")
+    # Save with horizon suffix
+    suffix = f"_{lookback}m" if lookback != 6 else ""
+    summary_path = RES / f"performance_summary{suffix}.csv"
+    df_sum.to_csv(summary_path)
+
+    print("\nSaved:")
+    print(f"  - {summary_path}")
+    print(f"  - results/portfolios_vs_benchmark{suffix}.png")
+    for n in PORT_SIZES:
+        print(f"  - results/portfolio_top{n}{suffix}.png")
+
 
 
 
