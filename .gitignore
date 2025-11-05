@@ -12,9 +12,7 @@ results/*
 !results/portfolios_vs_benchmark_6m.png
 !results/portfolios_vs_benchmark_12m.png
 !results/data_summary.pdf
-!results/top10_mcap.png
-!results/portfolios_vs_benchmark.png
-!results/relative_all.png
+
 .ipynb_checkpoints/
 .DS_Store
 Thumbs.db
