@@ -9,6 +9,7 @@ rebalance monthly, equal-weight, 1-month holding. Save:
 
 from __future__ import annotations
 import sys
+import argparse
 from pathlib import Path
 
 # Make src importable
@@ -30,47 +31,45 @@ RES.mkdir(parents=True, exist_ok=True)
 PORT_SIZES = [10, 20, 30, 40, 50]
 
 
-def load_inputs():
-    # Momentum (already >10B based on your build_momentum.py)
-    mom = pd.read_csv(DATA / "momentum_long.csv")
+def load_inputs(lookback: int = 6):
+    # pick momentum file by horizon
+    mom_path = DATA / (f"momentum_long_{lookback}m.csv" if lookback != 6 else "momentum_long.csv")
+    if not mom_path.exists():
+        # fallback to the generic file if L=6 and you didn’t create the _6m file
+        mom_path = DATA / "momentum_long.csv"
+
+    mom = pd.read_csv(mom_path)
     mom["date"] = pd.to_datetime(mom["date"], errors="coerce")
+    mom["NR"] = mom["NR"].astype(str)
 
     # Returns (1m) for ALL stocks; intersect with momentum NR universe
     rets_long = pd.read_csv(DATA / "stock_returns_long.csv")
     rets_long["date"] = pd.to_datetime(rets_long["date"], errors="coerce")
-
-    # Ensure returns are numeric (in case CSV saved them as strings)
     rets_long["ret_1m"] = pd.to_numeric(rets_long["ret_1m"], errors="coerce")
     rets_long["NR"] = rets_long["NR"].astype(str)
 
-    # Pivot returns to wide for fast selection
     rets_wide = (
         rets_long.pivot(index="date", columns="NR", values="ret_1m")
         .sort_index()
     )
+    rets_wide.columns = rets_wide.columns.astype(str)
 
-    # Universe from momentum file
     universe = sorted(mom["NR"].astype(str).unique().tolist())
-
-    # Restrict returns to momentum universe (just in case)
     keep_cols = [c for c in rets_wide.columns.astype(str) if c in set(universe)]
     rets_wide = rets_wide.reindex(columns=keep_cols)
 
-    # Benchmark from raw levels
+    # Benchmark from raw levels (your existing code)
     levels = load_monthly_data().copy().sort_values("date")
     date_col = "date"
-    bench_col = levels.columns[1]  # iShares (second column)
+    bench_col = levels.columns[1]
     levels[date_col] = pd.to_datetime(levels[date_col], errors="coerce")
 
-        
     levels[bench_col] = (
         levels[bench_col]
         .astype(str)
-        .str.replace(r"[^\d.\-eE]", "", regex=True)  # keep digits, minus, e/E, and dots
-        .replace(r"^\s*$", np.nan, regex=True)       # empty strings to NaN
+        .str.replace(r"[^\d.\-eE]", "", regex=True)
+        .replace(r"^\s*$", np.nan, regex=True)
     )
-
-    # Some Excel dumps may leave garbage like 'EE.E-E' or '--'
     levels[bench_col] = pd.to_numeric(levels[bench_col], errors="coerce")
 
     bench = levels[[date_col, bench_col]].dropna(subset=[bench_col]).copy()
@@ -81,34 +80,32 @@ def load_inputs():
 
 
 
-def build_portfolio_returns(mom: pd.DataFrame, rets_wide: pd.DataFrame, top_n: int) -> pd.Series:
-    """
-    For each formation month t:
-      - rank by mom_6m at t (descending)
-      - hold those names in month t+1 and take equal-weight mean return
-    Returns a pd.Series indexed by holding date (t+1): monthly portfolio returns.
-    """
-    mom = mom.copy()
-    mom["NR"] = mom["NR"].astype(str)
+
+def build_portfolio_returns(mom: pd.DataFrame, rets_wide: pd.DataFrame, top_n: int, lookback: int) -> pd.Series:
+    """Build equal-weight momentum portfolio with dynamic lookback."""
+    mom_col = f"mom_{lookback}m"
 
     port_rets = []
     dates = sorted(mom["date"].dropna().unique())
 
-    for t in range(len(dates) - 1):  # last date has no t+1 to realize returns
+    for t in range(len(dates) - 1):
         formation_date = pd.Timestamp(dates[t])
         holding_date = pd.Timestamp(dates[t + 1])
 
-        cross = mom[mom["date"] == formation_date].dropna(subset=["mom_6m"])
+        # dynamically select the right momentum column
+        cross = mom[mom["date"] == formation_date].dropna(subset=[mom_col])
         if cross.empty:
             continue
 
-        top = cross.sort_values("mom_6m", ascending=False).head(top_n)
+        top = cross.sort_values(mom_col, ascending=False).head(top_n)
         tickers = top["NR"].astype(str).tolist()
 
-        # Get realized next-month returns for those tickers
         if holding_date not in rets_wide.index:
             continue
-        r = rets_wide.loc[holding_date, tickers]
+        cols = [c for c in tickers if c in rets_wide.columns]
+        if not cols:
+            continue
+        r = rets_wide.loc[holding_date, cols]
         if r.dropna().empty:
             continue
 
@@ -119,7 +116,8 @@ def build_portfolio_returns(mom: pd.DataFrame, rets_wide: pd.DataFrame, top_n: i
 
     index = [d for d, _ in port_rets]
     values = [v for _, v in port_rets]
-    return pd.Series(values, index=index, name=f"top{top_n}_ret")
+    return pd.Series(values, index=index, name=f"top{top_n}_{lookback}m_ret")
+
 
 
 def cum_index(returns: pd.Series, start: float = 1.0) -> pd.Series:
@@ -180,14 +178,24 @@ def plot_all(portfolios: dict[str, pd.Series], bench_cum: pd.Series, outfile: Pa
     plt.savefig(outfile, dpi=220)
     plt.close()
 
+def parse_args():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--lookback", type=int, default=6, choices=[1,3,6,12],
+                    help="Momentum lookback in months (default 6).")
+    return ap.parse_args()
+
 
 def main():
-    mom, rets_wide, bench = load_inputs()
+    args = parse_args()
+    lookback = args.lookback
+    
+
+    mom, rets_wide, bench = load_inputs(lookback=lookback)
 
     # Build portfolio monthly returns for each N
     port_monthly = {}
     for n in PORT_SIZES:
-        s = build_portfolio_returns(mom, rets_wide, n)
+        s = build_portfolio_returns(mom, rets_wide, n, lookback)
         port_monthly[n] = s
         # Save returns
         out_csv = DATA / f"portfolio_returns_top{n}.csv"
@@ -222,7 +230,7 @@ def main():
     cum_dict = {f"Top {n}": cum_index(ports_aligned[n], start=1.0) for n in PORT_SIZES}
 
     # 5) Combined plot
-    plot_all(cum_dict, bench_cum, RES / "portfolios_vs_benchmark.png")
+    plot_all(cum_dict, bench_cum, RES / f"portfolios_vs_benchmark_{lookback}m.png")
 
     # Print quick metrics table (do NOT save; compute_metrics.py is the source of truth)
     print("\n=== Performance summary (monthly → annualized) ===")
