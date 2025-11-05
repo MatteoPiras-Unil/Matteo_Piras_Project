@@ -21,7 +21,7 @@ The goal of this project is to construct and evaluate momentum-based portfolios 
 2. **Finance analysis**
    - Determination of Momentum Score, using MSCI Methodology[3] and assuming no risk free rate:
    `Momentum₆ₘ = (Pₜ₋₁ / Pₜ₋₇) - 1`
-   - Define winners/losers subset for each month.
+   - Define winners subset for each month.
    - Compute monthly returns for each stock to create comparative graphs.
    - Other metrics to support momentum theory like **Sharpe Ratio**, **volatility**, **mean returns**.
 3. **Graphic Visualization**
