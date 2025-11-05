@@ -12,7 +12,7 @@ While the Momentum definition seems simple, financial experts classify the Momen
 
 In a world where financial market are more interconnected than ever and events, such as the **COVID-19 pandemic**, the growing uncertainty and the geopolitical tension, understanding the presence of the Momentum effect in today's environment is crucial. If the Momentum effect still shows up under these conditions, it would suggests that structural inefficiencies are still embedded in nowadays's financial market.
 
-The goal of this project is to construt a portfolio with a subset of the best stocks (relative to Momentum) and see if it actually outperform the general index. In addiction, to better validate the results, a similar portfolio but with the worst stocks will also be built to offer a comparison on returns differentials between winners and losers.
+The goal of this project is to construct and evaluate momentum-based portfolios by selecting subsets of the best-performing stocks and comparing their performance to a broad market benchmark. The analysis examines whether these “winner” portfolios consistently outperform the index and investigates how performance varies across different portfolio sizes and momentum lookback horizons, in order to identify the most efficient momentum strategy.
 
 ## Approach
 1. **Data Preparation**
