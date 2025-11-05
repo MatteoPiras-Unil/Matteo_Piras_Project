@@ -7,6 +7,11 @@ data/interim/
 data/processed/
 
 results/*
+!results/metrics_summary_*.csv
+!results/performance_summary_*.csv
+!results/metrics_summary.csv
+!results/performance_summary.csv
+!results/metrics_table_*.png
 !results/sharpe_ratio_vs_topN_by_horizon.png
 !results/sharpe_vs_topN_by_horizon.png
 !results/cagr_vs_topN_by_horizon.png

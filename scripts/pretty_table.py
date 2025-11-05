@@ -62,6 +62,7 @@ def _load_summary_for_horizon(lookback: int) -> pd.DataFrame:
         if path.exists():
             df = pd.read_csv(path)
             df = _normalize_cols(df)
+            print(f"[pretty_table] Using {path.name} for {lookback}m")
             return df
 
     raise FileNotFoundError(
