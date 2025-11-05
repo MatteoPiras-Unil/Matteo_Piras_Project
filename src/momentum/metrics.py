@@ -3,6 +3,8 @@ from __future__ import annotations
 from scipy import stats
 import numpy as np
 import pandas as pd
+import statsmodels.api as sm
+
 
 def cum_index(returns: pd.Series, start: float = 1.0) -> pd.Series:
     """Cumulative index that starts exactly at `start` on the first date."""
@@ -42,6 +44,20 @@ def sortino(r: pd.Series) -> float:
     ret = cagr(r)
     return ret / dvol if dvol and dvol > 0 else np.nan
 
+def hac_t_pvalue(active: pd.Series, lags: int | None = None) -> tuple[float, float]:
+    """
+    Compute HAC t-statistic and p-value for mean of `active` series.
+    """
+    a = active.dropna().values
+    if len(a) < 8:
+        return np.nan, np.nan
+    if lags is None:
+        lags = max(1, int(round(len(a) ** 0.25)))
+    X = np.ones((len(a), 1))                 # intercept-only regression (mean test)
+    ols = sm.OLS(a, X).fit(cov_type="HAC", cov_kwds={"maxlags": lags})
+    return float(ols.tvalues[0]), float(ols.pvalues[0])
+
+
 def align_common_start(series_dict: dict[str|int, pd.Series], bench: pd.Series):
     """Trim all monthly-return series to a common start date."""
     starts = [s.index.min() for s in series_dict.values() if not s.empty]
@@ -51,48 +67,42 @@ def align_common_start(series_dict: dict[str|int, pd.Series], bench: pd.Series):
     bench_aligned = bench[bench.index >= common_start]
     return aligned, bench_aligned, common_start
 
+def _p_stars(p: float) -> str:
+    if np.isnan(p): return "NaN"
+    if p < 0.01:    return f"{p:.4f}***"
+    if p < 0.05:    return f"{p:.4f}**"
+    if p < 0.10:    return f"{p:.4f}*"
+    return f"{p:.4f}"
+
 def metrics_table(named_series: dict[str, pd.Series], bench_name: str = "Benchmark") -> pd.DataFrame:
     """
-    Compute metrics and a p-value testing whether each portfolio's mean monthly
-    return differs from the benchmark's mean (paired t-test on aligned months).
-
-    Columns: Ann.Return (CAGR), Ann.Vol, Sharpe, Sortino, p-value (vs Benchmark)
+    Compute metrics and HAC p-value for H0: mean(active) = 0,
+    where active = portfolio - benchmark.
+    Columns: Ann.Return (CAGR), Ann.Vol, Sharpe, Sortino, p-HAC (vs BM)
     """
     if bench_name not in named_series:
         raise ValueError(f"'{bench_name}' not found in named_series")
 
     bench = named_series[bench_name].dropna().sort_index()
-
     rows = []
+
     for name, s in named_series.items():
         s = s.dropna().sort_index()
-        # metrics (always on the portfolio series itself)
+
+        # Base metrics
         ret = cagr(s)
         vol = ann_vol(s)
         sh  = sharpe(s)
         so  = sortino(s)
 
         if name == bench_name:
-            p_fmt = "—"  # no p-value for the benchmark vs itself
+            p_fmt = "—"
         else:
-            # align by date (paired test)
+            # Align and test active returns with HAC
             p_aligned, b_aligned = s.align(bench, join="inner")
-            # if too few overlapping observations, return NaN
-            if len(p_aligned) < 3:
-                p_fmt = "NaN"
-            else:
-                # paired t-test (equivalent to t-test on differences vs 0)
-                t_stat, p_val = stats.ttest_rel(p_aligned, b_aligned, nan_policy="omit")
-                if np.isnan(p_val):
-                    p_fmt = "NaN"
-                elif p_val < 0.001:
-                    p_fmt = f"{p_val:.4f}***"
-                elif p_val < 0.01:
-                    p_fmt = f"{p_val:.4f}**"
-                elif p_val < 0.05:
-                    p_fmt = f"{p_val:.4f}*"
-                else:
-                    p_fmt = f"{p_val:.4f}"
+            active = (p_aligned - b_aligned)
+            t_stat, p_val = hac_t_pvalue(active, lags=None)
+            p_fmt = _p_stars(p_val)
 
         rows.append([name, ret, vol, sh, so, p_fmt])
 
@@ -104,7 +114,7 @@ def metrics_table(named_series: dict[str, pd.Series], bench_name: str = "Benchma
             "Ann.Vol",
             "Sharpe",
             "Sortino",
-            "p-value",
+            "p-HAC (vs BM)",
         ],
     ).set_index("Portfolio")
 
