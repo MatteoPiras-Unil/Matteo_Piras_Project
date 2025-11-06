@@ -1,10 +1,5 @@
-# scripts/build_portfolio.py
-"""
-Build 5 momentum portfolios (Top 10/20/30/40/50 by 6m MSCI momentum),
-rebalance monthly, equal-weight, 1-month holding. Save:
-- data/processed/portfolio_returns_{N}.csv
-- results/portfolio_top{N}.png  (5 individual charts)
-- results/portfolios_vs_benchmark.png (all strategies + benchmark)
+"""Build momentum portfolios with different lookback periods,
+compute returns vs benchmark, and save results/plots.
 """
 
 from __future__ import annotations
@@ -266,7 +261,7 @@ def main():
     pd.set_option("display.float_format", lambda x: f"{x:0.4f}")
     print(df_sum)
     # Save with horizon suffix
-    suffix = f"_{lookback}m" if lookback != 6 else ""
+    suffix = f"_{lookback}m"
     summary_path = RES / f"performance_summary{suffix}.csv"
     df_sum.to_csv(summary_path)
 
