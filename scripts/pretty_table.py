@@ -1,5 +1,5 @@
-"""Generate pretty PNG tables from the metrics summary CSV files."""
-
+# scripts/pretty_table.py
+"""Generate pretty PNG tables from the *performance* summary CSV files (keep Benchmark)."""
 
 from __future__ import annotations
 import argparse
@@ -33,8 +33,7 @@ def _normalize_cols(df: pd.DataFrame) -> pd.DataFrame:
         "Sortino": "Sortino",
         "p-HAC (vs BM)": "p_HAC",
     }
-    df = df.rename(columns=rename)
-    return df
+    return df.rename(columns=rename)
 
 def _sig(p: float | None) -> str:
     if pd.isna(p):
@@ -44,24 +43,45 @@ def _sig(p: float | None) -> str:
     if p < 0.10: return "*"
     return ""
 
+def _find_summary_path(lookback: int) -> Path:
+    """Prefer performance_summary_{L}m.csv; else metrics_summary_{L}m.csv; else 6m fallbacks."""
+    suffix = f"_{lookback}m" if lookback != 6 else "_6m"
+    candidates = [
+        RES / f"performance_summary{suffix}.csv",
+        RES / f"metrics_summary{suffix}.csv",
+    ]
+    # Backward-compatible fallbacks for legacy 6m unsuffixed files
+    if lookback == 6:
+        candidates += [
+            RES / "performance_summary.csv",
+            RES / "metrics_summary.csv",
+        ]
+    for p in candidates:
+        if p.exists():
+            print(f"[pretty_table] Using {p.name} for {lookback}m")
+            return p
+    raise FileNotFoundError(
+        "Missing summary CSV. Expected one of:\n  - "
+        + "\n  - ".join(str(p) for p in candidates)
+        + f"\nRun: python scripts/build_portfolio.py --lookback {lookback} (and/or compute_metrics.py)."
+    )
+
 def _load_summary_for_horizon(lookback: int) -> pd.DataFrame:
-    suffix = f"_{lookback}m"
-    path = RES / f"metrics_summary{suffix}.csv"   # enforce HAC version per horizon
-    if not path.exists():
-        raise FileNotFoundError(
-            f"Missing {path}. Run: python scripts/compute_metrics.py --lookback {lookback}"
-        )
-    print(f"[pretty_table] Using {path.name} for {lookback}m")
-    return pd.read_csv(path)
+    path = _find_summary_path(lookback)
+    df = pd.read_csv(path)
+    return _normalize_cols(df)
 
 def _format_for_plot(df: pd.DataFrame) -> pd.DataFrame:
-    # keep only Top N rows and the key columns (use what exists)
+    # keep Top Ns + Benchmark if present
     keep_rows = [f"Top {n}" for n in TOPNS if f"Top {n}" in df.index]
+    if "Benchmark" in df.index:
+        keep_rows.append("Benchmark")
+
     cols_order = ["Ann.Return", "Ann.Vol", "Sharpe", "Sortino", "p_HAC"]
     cols = [c for c in cols_order if c in df.columns]
     df = df.loc[keep_rows, cols].copy()
 
-    # tolerant p_HAC formatting (numeric -> 0.0000 + stars; else keep as-is)
+    # Format p_HAC: numeric -> "0.0000" + stars; text like "—" stays as is
     if "p_HAC" in df.columns:
         raw = df["p_HAC"]
         num = pd.to_numeric(raw, errors="coerce")
@@ -70,11 +90,12 @@ def _format_for_plot(df: pd.DataFrame) -> pd.DataFrame:
             if pd.notna(p_num):
                 formatted.append(f"{p_num:.4f}{_sig(p_num)}")
             else:
+                # keep strings like "—" or blanks
                 formatted.append("" if pd.isna(p_raw) else str(p_raw))
         df["p-HAC (vs BM)"] = formatted
         df = df.drop(columns=["p_HAC"])
 
-    # number formatting
+    # Numeric formatting
     num_fmt = {
         "Ann.Return": "{:.4f}",
         "Ann.Vol": "{:.4f}",
@@ -89,7 +110,7 @@ def _format_for_plot(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 def _render_table_png(df: pd.DataFrame, title: str, outfile: Path):
-    fig, ax = plt.subplots(figsize=(7.6, 2.6 + 0.35 * len(df)))
+    fig, ax = plt.subplots(figsize=(7.8, 2.6 + 0.38 * len(df)))
     ax.axis("off")
     table = ax.table(
         cellText=df.values,
@@ -101,7 +122,7 @@ def _render_table_png(df: pd.DataFrame, title: str, outfile: Path):
     )
     table.auto_set_font_size(False)
     table.set_fontsize(10)
-    table.scale(1.0, 1.25)
+    table.scale(1.02, 1.28)
     ax.set_title(title, pad=12)
     plt.tight_layout()
     plt.savefig(outfile, dpi=220, bbox_inches="tight")
@@ -116,7 +137,8 @@ def build_one(lookback: int):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--lookback", type=int, choices=[1,3,6,12], help="Generate only for this horizon")
+    ap.add_argument("--lookback", type=int, choices=[1,3,6,12],
+                    help="Generate only for this horizon")
     args = ap.parse_args()
 
     if args.lookback:
@@ -127,5 +149,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
