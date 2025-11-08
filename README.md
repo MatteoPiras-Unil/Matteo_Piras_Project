@@ -23,8 +23,54 @@ On this idea, the project aims to:
     - Market capitalization
 
 ## Methodology
+1. **Compute Momentum**
+    - For each stock *i* at time *t*:
+    $$
+    M_{i,t} = \frac{P_{i,t-1}}{P_{i,t-k-1}} - 1
+    $$
+    where *k* is the lookback period (1,3,6,12)
+2. **Rank Stocks**
+    - At each period *t*, rank all stocks by $M_{i,t}$.
+    - Define the winner as the **best 10, 20, 30, 40, 50** stocks by momentum.
+3. **Form Portfolio**
+    - Build equally weighted portfolios including only the best ones according to momentum
+    - Compare the performance of portfolios to the benchmark.
+4. **Rebalance**
+    - Every month, the portfolio is rebalanced with the new top ***N*** stocks.
+5. **Backtest performance**
+    - Compute monthly returns of portfolios and benchmark.
+    - Performance metrics: mean return, aggregated/annual return, volatility, Sharpe ratio, to help the analysis.
+    - Build comparative chart and summary statistics for each horizon.
+
+## Results Summary
+- Equally weighted portfolios outperformed the benchmark in most of the horizon considered.
+- Momentum effect persisted more on smaller-sized portfolios but this comes with an higher volatility (the bigger the return, the bigger the volatility)
+- The use of equal weighted portfolio rather than market-cap weighting helps to have a clearer exposure to the pure momentum effect, which tends to be more dominated by bigger stocks and may reflects fundamentals rather than a clean momentum effect[2].
+
+## Repository Structure
+```
+Matteo_Piras_Project/
+│
+├── .venv/ # Virtual environment
+├── .vscode/ # VS Code settings
+│
+├── config/ # Configuration files
+├── data/ # Datasets (raw and cleaned)
+├── results/ # Output: figures, tables, results
+├── scripts/ # Helper or setup scripts
+├── src/ # Core source code
+├── tests/ # Unit tests
+│
+├── .env # Environment variables
+├── .gitignore # Git ignore file
+├── Proposal.md # Project proposal
+├── README.md # Documentation
+├── requirements.txt # Python dependencies
+└── run_all.py # Main pipeline runner
+```
 
 
 
 ## Bibliography
 -[1]: MSCI World Index. (n.d.). https://www.msci.com/indexes/index/990100
+-[2]: Swade, A., Sandra, N., Shackleton, M. B., & Lohre, H. (2022, November 18). Why do equally weighted portfolios beat Value-Weighted ones? https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4280394
