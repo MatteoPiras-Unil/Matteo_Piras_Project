@@ -69,6 +69,13 @@ Matteo_Piras_Project/
 └── run_all.py # Main pipeline runner
 ```
 
+## Installation & Usage
+1. **Clone the repository**
+```
+git clone https://github.com/MatteoPiras-Unil/Matteo_Piras_Project
+cd /files/Matteo_Piras_Project
+```
+
 
 
 ## Bibliography
