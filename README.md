@@ -97,7 +97,9 @@ This line will:
 - Output all summary statistics and chart in the folder ```results/```
 
 ## Example Output
-![Momentum vs Benchmark](results/portfolios_vs_benchmark_12m.png)
+![Momentum 12 vs Benchmark](results/portfolios_vs_benchmark_12m.png)
+
+This shows the cumulative returns of momentum portfolios with the lookback of 12 months. We can clearly see that the ***top 10*** portfolio outperformed the benchmark.
 
 
 ## Note
