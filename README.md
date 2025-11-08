@@ -108,4 +108,5 @@ This should ensure that every library used in the environment is listed in ```re
 
 ## Bibliography
 -[1]: MSCI World Index. (n.d.). https://www.msci.com/indexes/index/990100
+
 -[2]: Swade, A., Sandra, N., Shackleton, M. B., & Lohre, H. (2022, November 18). Why do equally weighted portfolios beat Value-Weighted ones? https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4280394
