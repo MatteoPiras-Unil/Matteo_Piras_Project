@@ -97,7 +97,7 @@ This line will:
 - Output all summary statistics and chart in the folder ```results/```
 
 ## Example Output
-![Momentum vs Benchmark](results/portfolio_vs_benchmark_12m.png)
+![Momentum vs Benchmark](results/portfolios_vs_benchmark_12m.png)
 
 
 ## Note
