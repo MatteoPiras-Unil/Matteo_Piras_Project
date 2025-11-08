@@ -96,6 +96,14 @@ This line will:
 - Calculate portfolios and benchmark returns
 - Output all summary statistics and chart in the folder ```results/```
 
+## Note
+If libraries are outdated or are not imported correctly, please run this block:
+```
+pip freeze --local > requirements.txt
+pip install -r requirements.txt
+```
+This should ensure that every library used in the environment is listed in ```requirements.txt``` and therefore installed.
+
 
 
 ## Bibliography
