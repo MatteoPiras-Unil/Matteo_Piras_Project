@@ -96,6 +96,10 @@ This line will:
 - Calculate portfolios and benchmark returns
 - Output all summary statistics and chart in the folder ```results/```
 
+## Example Output
+![Momentum vs Benchmark](results/portfolio_vs_benchmark_12m.png)
+
+
 ## Note
 If libraries are outdated or are not imported correctly, please run this block:
 ```
