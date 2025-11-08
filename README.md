@@ -75,6 +75,26 @@ Matteo_Piras_Project/
 git clone https://github.com/MatteoPiras-Unil/Matteo_Piras_Project
 cd /files/Matteo_Piras_Project
 ```
+2. **Create and activate virtual environment**
+```
+python -m venv .venv
+source .venv/bin/activate    # On Windows: .venv\Scripts\activate
+```
+3. **Install dependencies**
+```
+pip install -r requirements.txt
+```
+4. **Run pipeline**
+```
+python run_all.py
+```
+
+This line will:
+- Compute momentum scores
+- Select top ***N*** stocks for each rebalance date
+- Build equally weighted portfolio
+- Calculate portfolios and benchmark returns
+- Output all summary statistics and chart in the folder ```results/```
 
 
 
