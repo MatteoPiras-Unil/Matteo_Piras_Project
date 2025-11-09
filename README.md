@@ -29,6 +29,7 @@ On this idea, the project aims to:
 $$
 M_{i,t} = \frac{P_{i,t-1}}{P_{i,t-k-1}} - 1
 $$
+    
     where *k* is the lookback period (1,3,6,12)
 2. **Rank Stocks**
     - At each period *t*, rank all stocks by $M_{i,t}$.
