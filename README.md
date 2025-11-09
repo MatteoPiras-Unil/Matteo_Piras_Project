@@ -101,7 +101,11 @@ This line will:
 ## Example Output
 ![Momentum 12 vs Benchmark](results/portfolios_vs_benchmark_12m.png)
 
-This shows the cumulative returns of momentum portfolios with the lookback of 12 months. We can clearly see that the ***top 10*** portfolio outperformed the benchmark.
+This shows the cumulative returns of momentum portfolios with the lookback of 12 months. The ***top 10*** portfolio outperformed the benchmark.
+
+![Metrics 12m vs Benchmark](results/metrics_table_12m.png)
+
+This table summarizes the principal metrics regarding the 12-month portfolios vs benchmark. The p-HAC value refers to the statistical tests top N portfolio = benchmark, checking if they are equal.
 
 
 ## Note
