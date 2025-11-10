@@ -99,6 +99,7 @@ def lineplot_by_horizon(wide: pd.DataFrame, metric_name: str, outfile: Path):
     plt.title(f"{metric_name} Ratio Top-N — across momentum horizons")
     plt.legend(title="Horizon")
     plt.grid(True, alpha=0.3)
+    plt.xticks([10, 20, 30, 40, 50])
     plt.tight_layout()
     plt.savefig(outfile, dpi=220)
     plt.close()
