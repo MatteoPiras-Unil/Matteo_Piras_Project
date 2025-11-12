@@ -31,7 +31,7 @@ OUT.mkdir(parents=True, exist_ok=True)
 
 
 def _find_column(df: pd.DataFrame, candidates: list[str]) -> str | None:
-    """Return first matching column (case-insensitive, trimmed)."""
+    """Find the first matching column in df from a list of candidate names (case-insensitive)."""
     norm2orig = {str(c).strip().lower(): c for c in df.columns}
     for cand in candidates:
         key = cand.strip().lower()
@@ -41,7 +41,7 @@ def _find_column(df: pd.DataFrame, candidates: list[str]) -> str | None:
 
 
 def _to_float_series(s: pd.Series) -> pd.Series:
-    """Parse market cap strings like '1,234,567,890' to float."""
+    """Convert a Series to float, stripping non-numeric characters."""
     return (
         s.astype(str)
          .str.replace(r"[^\d.\-eE]", "", regex=True)
@@ -52,16 +52,16 @@ def _to_float_series(s: pd.Series) -> pd.Series:
 
 def main() -> None:
     # 1) Load price levels and basics
-    levels = load_monthly_data().copy()  # columns: date, benchmark, NR...
+    levels = load_monthly_data().copy() 
     levels = levels.sort_values("date")
     basic = load_basic_data().copy()
 
-    # 2) Identify columns
+    # 2) Identify columns: date, benchmark, stock NRs
     date_col = "date"
-    bench_col = levels.columns[1]          # e.g., 'iShares' (we ignore for momentum)
+    bench_col = levels.columns[1]      
     all_stock_cols = list(levels.columns[2:])
 
-    # 3) Find NR + MarketCap columns in Basic_Data
+    # 3) Find NR and MarketCap columns in Basic_Data
     nr_col = "NR"
     mcap_col = " Company Market Capitalization "
     
@@ -80,7 +80,7 @@ def main() -> None:
     if not stock_cols:
         raise ValueError("No overlap between >$10B universe and Monthly_Data columns.")
 
-    print(f"✅ Large-cap universe: {len(stock_cols)} stocks (MktCap > $10B).")
+    print(f"Large-cap universe: {len(stock_cols)} stocks (MktCap > $10B).")
 
     # 5) Ensure numeric for the selected stocks
     levels[stock_cols] = levels[stock_cols].apply(pd.to_numeric, errors="coerce")
@@ -95,17 +95,17 @@ def main() -> None:
     out_wide = OUT / "momentum_wide.csv"
     mom_wide.to_csv(out_wide, index=False)
 
-    # 8) Long format (date, NR, mom_6m), drop NaNs and outliers if any
+    # 8) Convert to long format, drop NaNs and outliers, save CSV
     mom_long = mom_wide.melt(id_vars=date_col, var_name="NR", value_name="mom_6m")
     mom_long = mom_long.dropna(subset=["mom_6m"])
-    # optional sanity guard
+    # Filter out extreme outliers beyond +/-200%
     mom_long = mom_long[(mom_long["mom_6m"] > -2.0) & (mom_long["mom_6m"] < 2.0)]
 
     out_long = OUT / "momentum_long.csv"
     mom_long.to_csv(out_long, index=False)
 
     # 9) Quick summary
-    print("✅ Built MSCI 6m momentum")
+    print("Built MSCI 6m momentum")
     print("  →", out_wide)
     print("  →", out_long)
     print("Rows (long):", len(mom_long))
