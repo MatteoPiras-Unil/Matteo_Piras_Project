@@ -1,4 +1,4 @@
-"""Data I/O functions for momentum project."""
+""" Data loading functions for Momentum project."""
 
 from pathlib import Path
 import pandas as pd
@@ -6,7 +6,7 @@ import pandas as pd
 RAW = Path("data/raw")
 
 def load_monthly_data() -> pd.DataFrame:
-    """Reads Monthly_Data.csv (semicolon-delimited), parses date, returns wide DataFrame."""
+    """Reads Monthly_Data.csv (semicolon-delimited) and parses the first column as dates."""
     path = RAW / "Monthly_Data.csv"
     df = pd.read_csv(path, sep=";")
     date_col = df.columns[0]
