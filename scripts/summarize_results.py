@@ -1,4 +1,4 @@
-"""Script to summarize and visualize portfolio performance results across momentum horizons and Top-N selections."""
+""" Script to summarize and plot performance results across different momentum horizons and Top-N portfolios."""
 from __future__ import annotations
 import argparse
 from pathlib import Path
@@ -13,7 +13,7 @@ TOPNS = [10, 20, 30, 40, 50]
 
 
 def _normalize_perf_columns(df: pd.DataFrame) -> pd.DataFrame:
-    """Normalize various header variants to: Ann.Return, Ann.Vol, Sharpe (keep others if present)."""
+    """ Normalize column names in performance/metrics summary DataFrames."""
     df = df.copy()
 
     if "Portfolio" in df.columns:
@@ -78,7 +78,7 @@ def load_perf(L: int) -> pd.DataFrame:
 
 
 def wide_metric(metric: str) -> pd.DataFrame:
-    """Build a matrix with rows=TopN, cols=horizon (1/3/6/12) for a given metric."""
+    """Create a wide DataFrame of a given metric across horizons and Top-N portfolios."""
     frames = []
     for L in HORIZONS:
         df = load_perf(L)
@@ -106,7 +106,7 @@ def lineplot_by_horizon(wide: pd.DataFrame, metric_name: str, outfile: Path):
 
 
 def bestN_table(metric: str) -> pd.DataFrame:
-    """For each horizon, report the TopN that maximizes the metric."""
+    """Create a table summarizing the best Top-N for each horizon based on the given metric."""
     rows = []
     for L in HORIZONS:
         df = load_perf(L)
