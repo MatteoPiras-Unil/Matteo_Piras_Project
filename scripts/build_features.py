@@ -32,10 +32,10 @@ def _find_column(df: pd.DataFrame, candidates: list[str]) -> str | None:
 
 
 def _to_float_series(s: pd.Series) -> pd.Series:
-    """Coerce market cap strings like '1,234,567,890' to float; keep NaN on failure."""
+    """Convert a Series of strings to floats, stripping out non-numeric characters."""
     return (
         s.astype(str)
-         .str.replace(r"[^\d.\-eE]", "", regex=True)  # drop spaces/commas/currency symbols
+         .str.replace(r"[^\d.\-eE]", "", regex=True)  # keep digits, dot, minus, exponent
          .replace({"": None})
          .astype(float)
     )
@@ -44,16 +44,15 @@ def _to_float_series(s: pd.Series) -> pd.Series:
 def main() -> None:
     # 1) Load data
     monthly = load_monthly_data().copy()
-    monthly = monthly.sort_values("date")  # 'date' already parsed in data_io
+    monthly = monthly.sort_values("date")  # ensure sorted by date
     basic = load_basic_data().copy()
 
     # 2) Identify key columns
     date_col = "date"
-    bench_col = monthly.columns[1]             # e.g., 'iShares' (ignored here)
-    all_stock_cols = list(monthly.columns[2:]) # NR columns
+    bench_col = monthly.columns[1]             
+    all_stock_cols = list(monthly.columns[2:]) 
 
-    # 3) Resolve linking + market cap columns from Basic_Data (robust to naming)
-    # Define directly since we know the column names
+    # 3) Find linking column (NR) and Market Cap column in basic data
     nr_col = "NR"
     mcap_col = " Company Market Capitalization "
 
@@ -65,14 +64,13 @@ def main() -> None:
             f"Available columns: {list(basic.columns)}"
         )
 
-    # 4) Build eligible universe: MktCap > 10B
-    # Normalize & parse
+    # 4) Filter basic data for large-cap stocks (MktCap > $10B)
     basic[nr_col] = basic[nr_col].astype(str).str.strip()
     basic[mcap_col] = _to_float_series(basic[mcap_col])
 
     eligible_ids = set(basic.loc[basic[mcap_col] > 10_000_000_000, nr_col].tolist())
 
-    # Intersect with columns actually present in Monthly_Data
+    # Filter monthly data columns to only include eligible large-cap stocks
     stock_cols = [c for c in all_stock_cols if str(c) in eligible_ids]
 
     if len(stock_cols) == 0:
@@ -81,21 +79,21 @@ def main() -> None:
             f"Eligible IDs (sample): {list(sorted(eligible_ids))[:10]}"
         )
 
-    print(f"✅ Keeping {len(stock_cols)} large-cap stocks (MktCap > 10B).")
-    print(f"ℹ️  Dropped {len(all_stock_cols) - len(stock_cols)} smaller-cap/absent columns.")
+    print(f"Keeping {len(stock_cols)} large-cap stocks (MktCap > 10B).")
+    print(f"Dropped {len(all_stock_cols) - len(stock_cols)} smaller-cap/absent columns.")
 
-    # 5) Ensure numeric for selected stocks
+    # 5) Convert stock columns to numeric (coerce errors to NaN)
     monthly[stock_cols] = monthly[stock_cols].apply(pd.to_numeric, errors="coerce")
 
-    # 6) Compute monthly returns (pct_change) for each selected stock
+    # 6) Compute monthly returns
     rets_wide = monthly[[date_col] + stock_cols].copy()
-    rets_wide[stock_cols] = rets_wide[stock_cols].pct_change(fill_method=None)  # no pad
+    rets_wide[stock_cols] = rets_wide[stock_cols].pct_change(fill_method=None) 
 
     # 7) Save wide
     out_wide = OUT / "stock_returns_wide.csv"
     rets_wide.to_csv(out_wide, index=False)
 
-    # 8) Long format (date, NR, ret_1m) with basic sanity filter
+    # 8) Melt to long format and clean
     rets_long = rets_wide.melt(id_vars=date_col, var_name="NR", value_name="ret_1m")
     rets_long = rets_long.dropna(subset=["ret_1m"])
     rets_long = rets_long[(rets_long["ret_1m"] > -2.0) & (rets_long["ret_1m"] < 2.0)]
@@ -103,8 +101,8 @@ def main() -> None:
     out_long = OUT / "stock_returns_long.csv"
     rets_long.to_csv(out_long, index=False)
 
-    # 9) Quick summary
-    print("✅ Built monthly returns for large-caps")
+    # 9) Summary output
+    print("Built monthly returns for large-caps")
     print("  →", out_wide)
     print("  →", out_long)
     print("Rows (long):", len(rets_long))
