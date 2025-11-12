@@ -1,4 +1,4 @@
-# run_all.py
+
 """
 Master pipeline to rebuild all momentum portfolios, tables, and plots.
 Runs the full workflow automatically:
@@ -30,7 +30,7 @@ def main():
     run_step("STEP 3: Summarizing results", 
              ["python", "scripts/summarize_results.py"])
 
-    print("\n✅ All steps completed successfully.")
+    print("\n All steps completed successfully.")
 
 if __name__ == "__main__":
     main()
