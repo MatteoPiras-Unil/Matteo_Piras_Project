@@ -1,18 +1,18 @@
-"""Make sure Python can see the "src" folder"""
+""" Test script for data I/O functions in the momentum package. """
 import sys
 from pathlib import Path
 
-# Add the project root and src folder to Python's search path
+# make src importable
 root = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(root / "src"))
 
-# scripts/test_data_io.py
+# Import data I/O functions
 try:
     from momentum.data_io import load_monthly_data, load_basic_data
 except ImportError:
     import importlib.util
 
-    # Fallback: load the module directly from the src path if package import fails
+    
     module_path = root / "src" / "momentum" / "data_io.py"
     if not module_path.exists():
         raise
@@ -24,14 +24,14 @@ except ImportError:
     load_basic_data = module.load_basic_data
 
 def main():
-    """ Load monthly data and run a quick test to ensure everything is working. """
+    """ Test loading of monthly and basic data. """
     monthly = load_monthly_data()
-    print("✅ Monthly data loaded!")
+    print("Monthly data loaded!")
     print("Shape:", monthly.shape)
     print("Columns:", list(monthly.columns[:5]), "...")
     print(monthly.head(3), "\n")
 
-    # Load basic data
+    # Test basic data loading
     basic = load_basic_data()
     print("✅ Basic data loaded!")
     print("Shape:", basic.shape)
