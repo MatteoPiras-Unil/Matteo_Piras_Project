@@ -1,4 +1,3 @@
-# scripts/pretty_table.py
 """Generate pretty PNG tables from the *performance* summary CSV files (keep Benchmark)."""
 
 from __future__ import annotations
@@ -32,7 +31,7 @@ def _normalize_cols(df: pd.DataFrame) -> pd.DataFrame:
         "Sharpe": "Sharpe",
         "Sortino": "Sortino",
         "p-HAC (vs BM)": "p_HAC",
-    }
+    } #rename is for consistency
     return df.rename(columns=rename)
 
 def _sig(p: float | None) -> str:
@@ -44,13 +43,13 @@ def _sig(p: float | None) -> str:
     return ""
 
 def _find_summary_path(lookback: int) -> Path:
-    """Prefer performance_summary_{L}m.csv; else metrics_summary_{L}m.csv; else 6m fallbacks."""
+    """Find the appropriate performance summary CSV for the given lookback period."""
     suffix = f"_{lookback}m" if lookback != 6 else "_6m"
     candidates = [
         RES / f"performance_summary{suffix}.csv",
         RES / f"metrics_summary{suffix}.csv",
     ]
-    # Backward-compatible fallbacks for legacy 6m unsuffixed files
+    # Special case: for 6m, also accept generic filenames
     if lookback == 6:
         candidates += [
             RES / "performance_summary.csv",
@@ -72,7 +71,7 @@ def _load_summary_for_horizon(lookback: int) -> pd.DataFrame:
     return _normalize_cols(df)
 
 def _format_for_plot(df: pd.DataFrame) -> pd.DataFrame:
-    # keep Top Ns + Benchmark if present
+    # Keep only Top-N and Benchmark
     keep_rows = [f"Top {n}" for n in TOPNS if f"Top {n}" in df.index]
     if "Benchmark" in df.index:
         keep_rows.append("Benchmark")
@@ -81,7 +80,7 @@ def _format_for_plot(df: pd.DataFrame) -> pd.DataFrame:
     cols = [c for c in cols_order if c in df.columns]
     df = df.loc[keep_rows, cols].copy()
 
-    # Format p_HAC: numeric -> "0.0000" + stars; text like "—" stays as is
+    # p-HAC formatting with significance stars
     if "p_HAC" in df.columns:
         raw = df["p_HAC"]
         num = pd.to_numeric(raw, errors="coerce")
@@ -90,7 +89,7 @@ def _format_for_plot(df: pd.DataFrame) -> pd.DataFrame:
             if pd.notna(p_num):
                 formatted.append(f"{p_num:.4f}{_sig(p_num)}")
             else:
-                # keep strings like "—" or blanks
+                # Missing p-value
                 formatted.append("" if pd.isna(p_raw) else str(p_raw))
         df["p-HAC (vs BM)"] = formatted
         df = df.drop(columns=["p_HAC"])
