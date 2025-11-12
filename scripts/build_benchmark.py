@@ -39,7 +39,7 @@ def main():
     # 2) save the return series once.
     out_returns = DATA / "benchmark_returns.csv"
     bench.to_frame("bench_ret").to_csv(out_returns)
-    print(f"✅ Saved {out_returns}")
+    print(f"Saved {out_returns}")
 
     # 3) compute and save frozen metrics.
     ret = cagr(bench)
@@ -54,7 +54,7 @@ def main():
     )
     out_metrics = RES / "benchmark_metrics.csv"
     frozen.to_csv(out_metrics)
-    print(f"✅ Saved {out_metrics}")
+    print(f"Saved {out_metrics}")
 
 if __name__ == "__main__":
     main()
