@@ -1,10 +1,10 @@
-# scripts/build_benchmark.py
+"""Build benchmark return series and compute frozen metrics."""
 from __future__ import annotations
 from pathlib import Path
 import numpy as np
 import pandas as pd
 
-# allow src imports
+"""Add src/ to sys.path for local imports."""
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
@@ -17,7 +17,8 @@ DATA.mkdir(parents=True, exist_ok=True)
 RES.mkdir(parents=True, exist_ok=True)
 
 def main():
-    # 1) read raw monthly levels (same source for all horizons)
+    """Build benchmark return series and compute frozen metrics."""
+    # 1) load and clean benchmark level data
     levels = load_monthly_data().copy().sort_values("date")
     date_col = "date"
     bench_col = levels.columns[1]  # iShares / benchmark column
@@ -35,13 +36,12 @@ def main():
     bench = bench.dropna(subset=["bench_ret"]).set_index(date_col)["bench_ret"]
     bench.name = "Benchmark"
 
-    # 2) save the return series once (source of truth for all horizons)
+    # 2) save the return series once.
     out_returns = DATA / "benchmark_returns.csv"
     bench.to_frame("bench_ret").to_csv(out_returns)
     print(f"✅ Saved {out_returns}")
 
-    # 3) compute fixed (global) metrics once and freeze them
-    #    (identical numbers will be used in every metrics table)
+    # 3) compute and save frozen metrics.
     ret = cagr(bench)
     vol = ann_vol(bench)
     shp = sharpe(bench)
