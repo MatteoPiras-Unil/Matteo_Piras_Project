@@ -12,8 +12,7 @@ It performs several checks:
 import sys
 from pathlib import Path
 proj_root = Path(__file__).resolve().parents[1]
-# Prefer the src layout, but also add the project root as a fallback so
-# the momentum package can be discovered in either location.
+# Make src/ importable
 sys.path.insert(0, str(proj_root / "src"))
 sys.path.insert(0, str(proj_root))
 
@@ -25,7 +24,7 @@ PROC = Path("data/processed")
 
 
 def _to_dt(s: pd.Series) -> pd.Series:
-    """Parse dates robustly: try ISO first (YYYY-MM-DD), then day-first."""
+    """Convert a Series to datetime, trying different formats if necessary."""
     dt = pd.to_datetime(s, errors="coerce")
     if dt.isna().mean() > 0.3:
         dt = pd.to_datetime(s, errors="coerce", dayfirst=True)
@@ -33,12 +32,12 @@ def _to_dt(s: pd.Series) -> pd.Series:
 
 
 def main():
-    """Run validations on processed stock returns data."""
+    """ Validate processed stock returns against raw levels data. """
     levels = load_monthly_data().copy()
     levels["date"] = _to_dt(levels["date"])
     levels = levels.sort_values("date")
 
-    bench_col = levels.columns[1]      # e.g., 'iShares'
+    bench_col = levels.columns[1]      
     stock_cols = list(levels.columns[2:])
 
     rets_wide = pd.read_csv(PROC / "stock_returns_wide.csv")
@@ -52,19 +51,19 @@ def main():
     print("Levels:", levels.shape, "| Returns wide:", rets_wide.shape,
      "| Returns long:", rets_long.shape)
 
-    # 1) Ensure benchmark not included in returns
+    # 1) Ensure benchmark column is not in returns
     assert bench_col not in rets_wide.columns, f"Benchmark column {bench_col} leaked into returns!"
 
-    # 2) Spot-check math on a few random tickers
+    # 2) Recompute returns for a random sample of tickers and compare
     rng = random.Random(42)
     sample = list(rng.sample(stock_cols, k=min(5, len(stock_cols))))
 
-    # Convert only sampled columns to numeric (keep date intact)
+
     levels_num = levels[["date"] + sample].copy()
     levels_num[sample] = levels_num[sample].apply(pd.to_numeric, errors="coerce")
 
     manual = levels_num.copy()
-    # Avoid deprecation warning by disabling fill
+    # Compute pct_change manually
     manual[sample] = manual[sample].pct_change(fill_method=None)
 
     left = rets_wide[["date"] + sample].copy()
@@ -76,21 +75,21 @@ def main():
     }
     print("Max abs diff (built vs manual pct_change) per sampled ticker:", diffs)
 
-    # 3) NaNs per ticker (expect ≈1 lead NaN)
+    # 3) Check for exactly one leading NaN per ticker in wide format
     nan_counts = rets_wide.drop(columns=["date"]).isna().sum()
     print("Median NaNs per ticker (expect ≈1):", float(nan_counts.median()))
     print("Tickers with >3 NaNs (inspect):", int((nan_counts > 3).sum()))
 
-    # 4) Reasonable return ranges
+    # 4) Examine return distribution
     q = rets_long["ret_1m"].quantile([0.001, 0.01, 0.99, 0.999])
     print("Return quantiles:\n", q.to_string())
     extreme = rets_long[(rets_long["ret_1m"] <= -2.0) | (rets_long["ret_1m"] >= 2.0)]
     print("Extreme moves (|r| >= 200%):", len(extreme))
 
-    # 5) Wide vs long consistency (pivot long back to wide and compare)
+    # 5) Validate wide vs long consistency
     pivot = rets_long.pivot(index="date", columns="NR", values="ret_1m").reset_index()
 
-    # Only compare NR columns common to both (exclude 'date' itself)
+    # Find common columns (tickers) between wide and pivoted long
     nr_cols_common = [c for c in pivot.columns if c != "date" and c in rets_wide.columns]
     common_cols = ["date"] + nr_cols_common
 
@@ -105,7 +104,7 @@ def main():
             maxdiff = max(maxdiff, float(d))
     print("Max wide vs long reconstruction diff:", maxdiff)
 
-    print("\n✅ Validation finished. If diffs ≈ 0 and ranges look sane, returns are OK.")
+    print("\n Validation finished. If diffs ≈ 0 and ranges look sane, returns are OK.")
 
 
 if __name__ == "__main__":
