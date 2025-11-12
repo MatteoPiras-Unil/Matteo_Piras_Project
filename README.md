@@ -61,7 +61,6 @@ Matteo_Piras_Project/
 ├── results/ # Output: figures, tables, results
 ├── scripts/ # Helper or setup scripts
 ├── src/ # Core source code
-├── tests/ # Unit tests
 │
 ├── .env # Environment variables
 ├── .gitignore # Git ignore file
