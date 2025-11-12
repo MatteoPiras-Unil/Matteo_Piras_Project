@@ -32,9 +32,6 @@ RES.mkdir(parents=True, exist_ok=True)
 PORT_SIZES = [10, 20, 30, 40, 50]
 
 
-# ------------------------------
-# I/O
-# ------------------------------
 def load_inputs(lookback: int) -> tuple[pd.DataFrame, pd.DataFrame, pd.Series]:
     """
     Load:
@@ -42,9 +39,9 @@ def load_inputs(lookback: int) -> tuple[pd.DataFrame, pd.DataFrame, pd.Series]:
       - stock_returns_long.csv (long format, 1m returns)
       - benchmark monthly returns from raw levels (iShares column)
     """
-    # momentum (universe already filtered to >10bn in your earlier pipeline)
+    # momentum
     if lookback == 6:
-        # prefer explicit _6m file if present, else fallback to legacy name
+        # special case: try to load momentum_long_6m.csv first
         cand = DATA / "momentum_long_6m.csv"
         mom_path = cand if cand.exists() else (DATA / "momentum_long.csv")
     else:
@@ -66,12 +63,12 @@ def load_inputs(lookback: int) -> tuple[pd.DataFrame, pd.DataFrame, pd.Series]:
     )
     rets_wide.columns = rets_wide.columns.astype(str)
 
-    # restrict to momentum universe (just in case)
+    # restrict returns to momentum
     universe  = set(mom["NR"].astype(str).unique().tolist())
     keep_cols = [c for c in rets_wide.columns if c in universe]
     rets_wide = rets_wide.reindex(columns=keep_cols)
 
-    # benchmark from raw levels (2nd column is iShares levels)
+    # benchmark returns from levels
     levels   = load_monthly_data().copy().sort_values("date")
     date_col = "date"
     bench_col = levels.columns[1]
@@ -79,7 +76,7 @@ def load_inputs(lookback: int) -> tuple[pd.DataFrame, pd.DataFrame, pd.Series]:
     levels[bench_col] = (
         levels[bench_col]
         .astype(str)
-        .str.replace(r"[^\d.\-eE]", "", regex=True)   # keep digits, -, e/E, dot
+        .str.replace(r"[^\d.\-eE]", "", regex=True) 
         .replace(r"^\s*$", np.nan, regex=True)
     )
     levels[bench_col] = pd.to_numeric(levels[bench_col], errors="coerce")
@@ -92,9 +89,6 @@ def load_inputs(lookback: int) -> tuple[pd.DataFrame, pd.DataFrame, pd.Series]:
     return mom, rets_wide, bench
 
 
-# ------------------------------
-# Portfolio construction
-# ------------------------------
 def build_portfolio_returns(
     mom: pd.DataFrame,
     rets_wide: pd.DataFrame,
@@ -145,9 +139,7 @@ def build_portfolio_returns(
     return pd.Series(val, index=idx, name=f"top{top_n}_{lookback}m_ret")
 
 
-# ------------------------------
-# Plotting
-# ------------------------------
+
 def plot_single(cum: pd.Series, title: str, outfile: Path):
     plt.figure(figsize=(9, 5))
     plt.plot(cum.index, cum.values)
@@ -171,7 +163,7 @@ def plot_all(portfolios: dict[str, pd.Series], bench_cum: pd.Series, outfile: Pa
     plt.ylabel("Cumulative value (start=1.0)")
     plt.legend()
 
-    # event markers (optional)
+    # event markers
     events = [
         ("2020-03-15", "COVID-19"),
         ("2025-03-01", "Tariff announcement"),
@@ -187,9 +179,7 @@ def plot_all(portfolios: dict[str, pd.Series], bench_cum: pd.Series, outfile: Pa
     plt.close()
 
 
-# ------------------------------
-# Args
-# ------------------------------
+
 def parse_args():
     ap = argparse.ArgumentParser()
     ap.add_argument("--lookback", type=int, default=6, choices=[1, 3, 6, 12],
@@ -197,37 +187,35 @@ def parse_args():
     return ap.parse_args()
 
 
-# ------------------------------
-# Main
-# ------------------------------
+
 def main():
     args = parse_args()
     L = int(args.lookback)
-    suffix = f"_{L}m"  # ALWAYS include suffix, even for 6m
+    suffix = f"_{L}m"  # for output files
 
     mom, rets_wide, bench = load_inputs(lookback=L)
 
-    # portfolios monthly returns
+    # build portfolios and save monthly returns
     port_monthly: dict[int, pd.Series] = {}
     for n in PORT_SIZES:
         s = build_portfolio_returns(mom, rets_wide, n, L)
         port_monthly[n] = s
-        # save monthly returns with suffix to avoid overwriting across horizons
+        # save monthly returns
         (DATA / f"portfolio_returns_top{n}{suffix}.csv").write_text(
             s.to_csv(header=True), encoding="utf-8"
         )
 
-    # align all monthly-return series to common start (including benchmark)
+    # align all series to common start date
     named = {f"Top {n}": port_monthly[n] for n in PORT_SIZES}
     named["Benchmark"] = bench
     aligned, bench_aligned, common_start = align_common_start(named, named["Benchmark"])
     print(f"Common start date: {common_start}")
 
-    # cumulative indices for plots (rebased to 1 from common start)
+    # cumulative indices
     bench_cum = cum_index(bench_aligned, start=1.0)
     cum_dict  = {k: cum_index(v, start=1.0) for k, v in aligned.items() if k != "Benchmark"}
 
-    # plots
+    
     for n in PORT_SIZES:
         if not aligned[f"Top {n}"].empty:
             plot_single(
@@ -237,10 +225,10 @@ def main():
             )
     plot_all(cum_dict, bench_cum, RES / f"portfolios_vs_benchmark{suffix}.png", lookback=L)
 
-    # metrics table (HAC p-values computed inside metrics_table)
+    # metrics table
     df_sum = metrics_table({**aligned, "Benchmark": bench_aligned})
 
-    # OPTIONAL: freeze benchmark row in the CSV metrics table (plots unaffected)
+    # apply frozen benchmark metrics if available
     frozen_path = RES / "benchmark_metrics.csv"
     if frozen_path.exists():
         try:
@@ -255,7 +243,7 @@ def main():
     out_csv = RES / f"performance_summary{suffix}.csv"
     df_sum.to_csv(out_csv, index=True)
 
-    # console summary
+    # print summary
     pd.set_option("display.float_format", lambda x: f"{x:0.4f}")
     print("\n=== Performance Metrics (aligned sample) ===")
     print(df_sum)
