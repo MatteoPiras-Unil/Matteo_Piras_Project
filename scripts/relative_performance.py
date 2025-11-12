@@ -1,4 +1,11 @@
-""" This script computes and plots the relative cumulative performance of top-N portfolios"""
+""" Compute and plot the relative cumulative performance of Top-N portfolios vs Benchmark.
+Steps:
+1) Load monthly returns for Top-N portfolios and Benchmark
+2) Align time series to common dates
+3) Compute cumulative indices
+4) Compute ratio of cumulative indices (Portfolio / Benchmark)
+5) Save relative performance CSVs and plots
+6) Create combined plot for all Top-N portfolios"""
 
 from pathlib import Path
 import pandas as pd
@@ -37,7 +44,7 @@ def main():
     bench = load_bench()
     portfolios = {n: load_port(n) for n in [10,20,30,40,50]}
 
-    # align monthly returns, build cumulative & ratio
+    # Compute relative cumulative performance and plot
     for n, rp in portfolios.items():
         rb = bench
         rp, rb = rp.align(rb, join="inner")
