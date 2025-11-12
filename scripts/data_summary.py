@@ -1,4 +1,3 @@
-# scripts/data_summary.py
 """
 Generate a 1-page PDF 'Dataset Summary Report' with:
 - total stocks, total market cap
@@ -45,8 +44,8 @@ PDF_PATH = RESULTS_DIR / "data_summary.pdf"
 
 def _find_column(df: pd.DataFrame, candidates: List[str]) -> Optional[str]:
     """
-    Return the FIRST matching column name (case-insensitive, trimmed) from candidates.
-    Handles headers with extra spaces like ' Company Market Capitalization '.
+    Find the first matching column in df from a list of candidate names (case-insensitive).
+    Returns the original column name if found, else None.
     """
     norm2orig = {str(c).strip().lower(): c for c in df.columns}
     for cand in candidates:
@@ -57,7 +56,7 @@ def _find_column(df: pd.DataFrame, candidates: List[str]) -> Optional[str]:
 
 
 def _to_float_series(s: pd.Series) -> pd.Series:
-    """Coerce market cap strings like '1,234,567,890' or ' 1 234 ' to float; keep NaN on failure."""
+    """Convert a Series to float, stripping non-numeric characters."""
     return (
         s.astype(str)
          .str.replace(r"[^\d.\-eE]", "", regex=True)  
@@ -67,7 +66,7 @@ def _to_float_series(s: pd.Series) -> pd.Series:
 
 
 def _pick_label_col(basic: pd.DataFrame, name_col: Optional[str], symbol_col: Optional[str], nr_col: str) -> pd.Series:
-    """Return a column to use for labels: prefer company name, then symbol, else NR."""
+    """ Pick the best available label column from name, symbol, or NR."""
     if name_col and name_col in basic.columns:
         labels = basic[name_col].astype(str).str.strip()
         if labels.notna().any():
@@ -80,11 +79,11 @@ def _pick_label_col(basic: pd.DataFrame, name_col: Optional[str], symbol_col: Op
 
 
 def main() -> None:
-    # --- Load data
+
     basic = load_basic_data().copy()
     monthly = load_monthly_data().copy()
 
-    # --- Resolve important columns in Basic_Data
+    # --- Identify columns
     nr_col = _find_column(basic, ["NR", "Nr", "Id", "ID"])
     name_col = _find_column(basic, ["Company Common Name", "Common Name", "Name"])
     symbol_col = _find_column(basic, ["SYMBOL", "Symbol", "Ticker"])
@@ -109,7 +108,7 @@ def main() -> None:
             f"Available columns: {list(basic.columns)}"
         )
 
-    # --- Clean/parse
+    # --- Preprocess columns
     basic[nr_col] = basic[nr_col].astype(str).str.strip()
     basic[mcap_col] = _to_float_series(basic[mcap_col])
     if sector_col:
@@ -117,8 +116,8 @@ def main() -> None:
     if country_col:
         basic[country_col] = basic[country_col].astype(str).str.strip()
 
-    # --- Basic stats
-    # Use positive/valid market caps for ranking
+    # --- Compute statistics
+    # Valid Market Cap entries
     valid = basic[basic[mcap_col].notna() & (basic[mcap_col] > 0)].copy()
     n_total = basic[nr_col].nunique()
     n_valid = valid[nr_col].nunique()
@@ -138,7 +137,6 @@ def main() -> None:
     pct_over10b = (n_over10b / n_total) * 100 if n_total > 0 else 0.0
 
     # Date coverage from Monthly_Data
-    # 'date' already parsed in data_io; just in case, coerce
     monthly["date"] = pd.to_datetime(monthly["date"], errors="coerce")
     date_min = monthly["date"].min()
     date_max = monthly["date"].max()
@@ -158,10 +156,10 @@ def main() -> None:
     else:
         top5_sectors = []
 
-        # --- Build Top-10 by Market Cap bar chart (labels prefer name > symbol > NR)
+        #-- Create bar chart of top 10 companies by market cap
     label_series = _pick_label_col(basic, name_col, symbol_col, nr_col)
 
-    # Build a mapping NR -> Label, then attach labels to 'valid'
+    # Generate bar chart for top 10 by market cap
     labels_df = basic[[nr_col]].copy()
     labels_df["Label"] = label_series.astype(str).str.strip().values
 
@@ -179,7 +177,7 @@ def main() -> None:
         plt.close()
 
 
-    # --- Build PDF
+    # Build PDF
     doc = SimpleDocTemplate(str(PDF_PATH), pagesize=A4, leftMargin=36, rightMargin=36, topMargin=36, bottomMargin=36)
     styles = getSampleStyleSheet()
     story = []
@@ -249,7 +247,7 @@ def main() -> None:
         story.append(sec_tbl)
         story.append(Spacer(1, 10))
 
-    # Bar chart (if created)
+    # Bar chart section
     if CHART_PATH.exists():
         story.append(Paragraph("<b>Top 10 Companies by Market Cap</b>", styles["Heading3"]))
         story.append(Spacer(1, 4))
@@ -258,7 +256,7 @@ def main() -> None:
 
     doc.build(story)
 
-    print("✅ Summary report created:")
+    print("Summary report created:")
     print("  →", PDF_PATH)
     if CHART_PATH.exists():
         print("  →", CHART_PATH)
