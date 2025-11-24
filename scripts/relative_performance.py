@@ -28,7 +28,18 @@ def load_port(n):
     return s.dropna()
 
 def load_bench():
-    from momentum.data_io import load_monthly_data
+    try:
+        from momentum.data_io import load_monthly_data
+    except (ImportError, ModuleNotFoundError) as exc:
+        # fallback: try to load data_io.py directly from the project's src/momentum folder
+        import importlib.util
+        module_path = Path(__file__).resolve().parents[1] / "src" / "momentum" / "data_io.py"
+        spec = importlib.util.spec_from_file_location("momentum.data_io", str(module_path))
+        if spec is None or spec.loader is None:
+            raise ImportError(f"Could not import momentum.data_io from package or path {module_path}") from exc
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        load_monthly_data = module.load_monthly_data
     df = load_monthly_data().sort_values("date")
     date_col, bench_col = "date", df.columns[1]
     df[date_col] = pd.to_datetime(df[date_col], errors="coerce")
