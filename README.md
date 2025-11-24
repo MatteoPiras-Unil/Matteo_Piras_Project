@@ -9,8 +9,8 @@ The **Momentum Effect** is one of the most persistent market anomalies.
 Firstly documented by **Jegadeesh and Titman (1993)**, it shows how stocks with strong past performances tend to keep this trend in the future.
 
 On this idea, the project aims to:
-- Measure the momentum's strenght along all stocks
-- Build and evaluate whether momentum-based portfolios can outperform a passive benchmark (iShares in this case)
+- Measure the momentum's strenght along all stocks.
+- Build and evaluate whether momentum-based portfolios can outperform a passive benchmark (iShares in this case).
 - Compare portfolios on theirs lookback periods.
 
 ## Data
