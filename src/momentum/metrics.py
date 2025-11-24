@@ -1,6 +1,5 @@
 # src/momentum/metrics.py
 from __future__ import annotations
-from scipy import stats
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
@@ -26,8 +25,10 @@ def ann_vol(r: pd.Series) -> float:
     return r.std(ddof=1) * np.sqrt(12) if len(r) > 1 else np.nan
 
 def sharpe(r: pd.Series, rf: float = 0.0) -> float:
-    vol = ann_vol(r); ret = cagr(r)
-    return ret / vol if vol and vol > 0 else np.nan
+    vol = ann_vol(r)
+    ret = cagr(r)
+    excess_ret = ret - rf if not np.isnan(ret) else np.nan
+    return excess_ret / vol if vol and vol > 0 and not np.isnan(excess_ret) else np.nan
 
 def max_drawdown(r: pd.Series) -> float:
     idx = cum_index(r, 1.0)
@@ -101,7 +102,7 @@ def metrics_table(named_series: dict[str, pd.Series], bench_name: str = "Benchma
             # Align and test active returns with HAC
             p_aligned, b_aligned = s.align(bench, join="inner")
             active = (p_aligned - b_aligned)
-            t_stat, p_val = hac_t_pvalue(active, lags=None)
+            _, p_val = hac_t_pvalue(active, lags=None)
             p_fmt = _p_stars(p_val)
 
         rows.append([name, ret, vol, sh, so, p_fmt])
