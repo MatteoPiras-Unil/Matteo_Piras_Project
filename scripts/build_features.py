@@ -5,13 +5,31 @@ Saves both wide and long formats to data/processed/.
 
 from pathlib import Path
 import sys
-from pathlib import Path as _P
 
 # Ensure we can import from src/
-sys.path.insert(0, str(_P(__file__).resolve().parents[1] / "src"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 import pandas as pd
-from momentum.data_io import load_monthly_data, load_basic_data
+try:
+    from momentum.data_io import load_monthly_data, load_basic_data
+except ImportError:
+    # Fallback: try to load the module directly from the src folder by file path
+    import importlib.util
+
+    src_root = Path(__file__).resolve().parents[1] / "src"
+    module_path = src_root / "momentum" / "data_io.py"
+
+    if module_path.exists():
+        spec = importlib.util.spec_from_file_location("momentum.data_io", str(module_path))
+        module = importlib.util.module_from_spec(spec)
+        assert spec.loader is not None
+        spec.loader.exec_module(module)  # type: ignore
+        load_monthly_data = module.load_monthly_data
+        load_basic_data = module.load_basic_data
+    else:
+        # ensure src is on sys.path and re-raise the import error for visibility
+        sys.path.insert(0, str(src_root))
+        from momentum.data_io import load_monthly_data, load_basic_data
 
 OUT = Path("data/processed")
 OUT.mkdir(parents=True, exist_ok=True)
@@ -49,7 +67,7 @@ def main() -> None:
 
     # 2) Identify key columns
     date_col = "date"
-    bench_col = monthly.columns[1]             
+    # bench_col (monthly.columns[1]) is not needed elsewhere, so we omit assigning it to avoid an unused-variable warning
     all_stock_cols = list(monthly.columns[2:]) 
 
     # 3) Find linking column (NR) and Market Cap column in basic data
