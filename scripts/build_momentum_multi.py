@@ -2,12 +2,20 @@
 from __future__ import annotations
 import sys
 from pathlib import Path
-import numpy as np
 import pandas as pd
 
-# make src/ importable
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
-from momentum.data_io import load_monthly_data
+# make src/ importable (try normal import first, fall back to loading module by path)
+src_dir = Path(__file__).resolve().parents[1] / "src"
+sys.path.insert(0, str(src_dir))
+try:
+    from momentum.data_io import load_monthly_data
+except (ImportError, AttributeError):
+    import importlib.util
+    module_path = src_dir / "momentum" / "data_io.py"
+    spec = importlib.util.spec_from_file_location("momentum.data_io", str(module_path))
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    load_monthly_data = getattr(module, "load_monthly_data")
 
 OUT = Path("data/processed")
 OUT.mkdir(parents=True, exist_ok=True)
@@ -31,7 +39,7 @@ def compute_momentum(levels: pd.DataFrame, lookback: int) -> pd.DataFrame:
     df = levels.copy()
     df = df.sort_values("date")
     date_col = "date"
-    bench_col = df.columns[1]        
+    # bench_col (benchmark column) is not required for the momentum calculation
     stock_cols = list(df.columns[2:])
 
     df[date_col] = pd.to_datetime(df[date_col], errors="coerce")
