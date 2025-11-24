@@ -27,7 +27,32 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from momentum.data_io import load_basic_data, load_monthly_data
+# Try standard package import, with fallbacks to common local locations to make the module import robust.
+import importlib
+
+_candidates = ["momentum.data_io", "src.momentum.data_io", "data_io"]
+_module = None
+_tried = []
+for _modname in _candidates:
+    try:
+        _module = importlib.import_module(_modname)
+        break
+    except ImportError:
+        _tried.append(_modname)
+
+if _module is None:
+    raise ImportError(
+        f"Could not import 'load_basic_data' and 'load_monthly_data' from any of: {', '.join(_tried)}; "
+        f"ensure the 'momentum' package or a 'data_io.py' module exists in your project's src/ directory or PYTHONPATH."
+    )
+
+try:
+    load_basic_data = getattr(_module, "load_basic_data")
+    load_monthly_data = getattr(_module, "load_monthly_data")
+except AttributeError as exc:
+    raise ImportError(
+        f"Module '{_module.__name__}' was imported but does not define 'load_basic_data' and 'load_monthly_data'."
+    ) from exc
 
 # ReportLab for PDF
 from reportlab.lib.pagesizes import A4
