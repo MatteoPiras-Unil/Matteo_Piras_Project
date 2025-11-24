@@ -4,12 +4,40 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-"""Add src/ to sys.path for local imports."""
+# Add src/ to sys.path for local imports.
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from momentum.data_io import load_monthly_data
-from momentum.metrics import cagr, ann_vol, sharpe, sortino
+# Try normal imports first; if the environment (or static analysis) cannot find
+# the package, attempt to load the modules directly from src/momentum/*.py.
+try:
+    from momentum.data_io import load_monthly_data
+    from momentum.metrics import cagr, ann_vol, sharpe, sortino
+except (ImportError, ModuleNotFoundError):
+    import importlib.util
+
+    base_src = Path(__file__).resolve().parents[1] / "src"
+    if str(base_src) not in sys.path:
+        sys.path.insert(0, str(base_src))
+
+    def _load_module_from_file(fullname, path):
+        spec = importlib.util.spec_from_file_location(fullname, str(path))
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        sys.modules[fullname] = mod
+        return mod
+
+    data_io_path = base_src / "momentum" / "data_io.py"
+    metrics_path = base_src / "momentum" / "metrics.py"
+
+    if data_io_path.exists():
+        _load_module_from_file("momentum.data_io", data_io_path)
+    if metrics_path.exists():
+        _load_module_from_file("momentum.metrics", metrics_path)
+
+    # Try the imports again (will raise if everything failed)
+    from momentum.data_io import load_monthly_data
+    from momentum.metrics import cagr, ann_vol, sharpe, sortino
 
 DATA = Path("data/processed")
 RES  = Path("results")
