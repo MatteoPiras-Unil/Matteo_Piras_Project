@@ -18,7 +18,22 @@ sys.path.insert(0, str(proj_root))
 
 import random
 import pandas as pd
-from momentum.data_io import load_monthly_data
+try:
+    from momentum.data_io import load_monthly_data
+except (ImportError, AttributeError):
+    # Fallback: try to load the module directly from the src path in case the package
+    # isn't available on sys.path or __init__.py is missing.
+    import importlib.util
+    src_path = proj_root / "src" / "momentum" / "data_io.py"
+    if src_path.exists():
+        spec = importlib.util.spec_from_file_location("momentum.data_io", str(src_path))
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        load_monthly_data = getattr(mod, "load_monthly_data")
+    else:
+        # As a last resort, try importing a top-level data_io module
+        from importlib import import_module
+        load_monthly_data = import_module("data_io").load_monthly_data
 
 PROC = Path("data/processed")
 
