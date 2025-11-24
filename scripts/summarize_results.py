@@ -1,6 +1,5 @@
 """ Script to summarize and plot performance results across different momentum horizons and Top-N portfolios."""
 from __future__ import annotations
-import argparse
 from pathlib import Path
 import pandas as pd
 import matplotlib.pyplot as plt
