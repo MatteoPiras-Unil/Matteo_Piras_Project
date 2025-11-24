@@ -18,13 +18,43 @@ Steps:
 from __future__ import annotations
 import sys
 from pathlib import Path
-from pathlib import Path as _P
+_P = Path
 
 # ensure we can import from src/
 sys.path.insert(0, str(_P(__file__).resolve().parents[1] / "src"))
 
 import pandas as pd
-from momentum.data_io import load_monthly_data, load_basic_data
+import importlib
+import importlib.util
+
+def _load_data_io():
+    """
+    Robustly load load_monthly_data and load_basic_data from momentum.data_io by:
+      1) trying package imports (momentum.data_io, src.momentum.data_io) using find_spec,
+      2) falling back to loading the expected source file directly.
+    """
+    names_to_try = ["momentum.data_io", "src.momentum.data_io"]
+    for name in names_to_try:
+        try:
+            if importlib.util.find_spec(name) is not None:
+                module = importlib.import_module(name)
+                return module.load_monthly_data, module.load_basic_data
+        except (ImportError, AttributeError, ValueError):
+            # continue to next candidate for import-related errors only
+            continue
+
+    # fallback: load the module directly from the expected file path
+    src_file = _P(__file__).resolve().parents[1] / "src" / "momentum" / "data_io.py"
+    if src_file.exists():
+        spec = importlib.util.spec_from_file_location("momentum.data_io", str(src_file))
+        if spec and spec.loader:
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            return module.load_monthly_data, module.load_basic_data
+
+    raise ImportError(f"Could not import momentum.data_io (tried package names and loading {src_file})")
+
+load_monthly_data, load_basic_data = _load_data_io()
 
 OUT = Path("data/processed")
 OUT.mkdir(parents=True, exist_ok=True)
@@ -58,7 +88,7 @@ def main() -> None:
 
     # 2) Identify columns: date, benchmark, stock NRs
     date_col = "date"
-    bench_col = levels.columns[1]      
+    # bench_col = levels.columns[1]  # not used
     all_stock_cols = list(levels.columns[2:])
 
     # 3) Find NR and MarketCap columns in Basic_Data
