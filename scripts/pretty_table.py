@@ -103,7 +103,9 @@ def _format_for_plot(df: pd.DataFrame) -> pd.DataFrame:
     }
     for c, f in num_fmt.items():
         if c in df.columns:
-            df[c] = df[c].map(lambda x: f.format(x) if pd.notna(x) else "")
+            # bind the format string to a local name to avoid late-binding closure issues
+            fmt = f
+            df[c] = df[c].map(lambda x, fmt=fmt: fmt.format(x) if pd.notna(x) else "")
 
     df.index.name = "Portfolio"
     return df
@@ -123,9 +125,9 @@ def _render_table_png(df: pd.DataFrame, title: str, outfile: Path):
     table.set_fontsize(10)
     table.scale(1.02, 1.28)
     ax.set_title(title, pad=12)
-    plt.tight_layout()
-    plt.savefig(outfile, dpi=220, bbox_inches="tight")
-    plt.close()
+    fig.tight_layout()
+    fig.savefig(outfile, dpi=220, bbox_inches="tight")
+    plt.close(fig)
 
 def build_one(lookback: int):
     df = _load_summary_for_horizon(lookback)
