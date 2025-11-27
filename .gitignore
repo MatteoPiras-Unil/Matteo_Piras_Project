@@ -4,7 +4,7 @@ __pycache__/
 .vscode/
 
 data/interim/
-data/processed/
+
 
 results/*
 !results/metrics_summary_*.csv
