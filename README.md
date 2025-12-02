@@ -64,10 +64,12 @@ Matteo_Piras_Project/
 │
 ├── .env # Environment variables
 ├── .gitignore # Git ignore file
+├── AI_Usage.md
+├── main.py # Main pipeline runner
+├── Matteo_Piras_Report.pdf
 ├── Proposal.md # Project proposal
 ├── README.md # Documentation
-├── requirements.txt # Python dependencies
-└── run_all.py # Main pipeline runner
+└── requirements.txt # Python dependencies
 ```
 
 ## Installation & Usage
@@ -87,7 +89,7 @@ pip install -r requirements.txt
 ```
 4. **Run pipeline**
 ```
-python run_all.py
+python main.py
 ```
 
 This line will:
