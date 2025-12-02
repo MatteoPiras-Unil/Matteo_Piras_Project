@@ -25,7 +25,7 @@ I verified the computations, ensured proper series alignment, and confirmed that
 3. Automated Pipeline
 AI contributed to the initial structure of:
 
-- ```run_all.py```
+- ```main.py```
 - command-line argument flow
 - sequential execution of data → portfolios → metrics → plots
 
