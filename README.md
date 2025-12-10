@@ -73,10 +73,10 @@ Matteo_Piras_Project/
 ```
 
 ## Installation & Usage
-1. **Clone the repository**
+1. **Clone the repository and set directory**
 ```
 git clone https://github.com/MatteoPiras-Unil/Matteo_Piras_Project
-cd /files/Matteo_Piras_Project
+cd "your_directory"/Matteo_Piras_Project
 ```
 2. **Create and activate virtual environment**
 ```
